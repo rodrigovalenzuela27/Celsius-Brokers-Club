@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Celsius · Plataforma · Prototipo</title>
+<meta name="description" content="Prototipo navegable de la plataforma Celsius: cotizador, portal cliente y consola admin." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600&family=JetBrains+Mono:wght@400;500&family=Source+Serif+4:ital,wght@1,400&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --ink: #F5F5F5;
+    --bone: #383838;
+    --deep-forest: #1E1E1E;
+    --stone: #4A4A4A;
+    --graphite: #B5B5B5;
+    --moss: #009DEA;
+    --oxide: #38A9FF;
+    --sage: #80C5F0;
+    --hairline: rgba(255,255,255,0.10);
+    --hairline-strong: rgba(255,255,255,0.24);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { background: var(--bone); color: var(--ink); font-family: 'Inter Tight', sans-serif; font-size: 15px; line-height: 1.55; -webkit-font-smoothing: antialiased; font-variant-numeric: tabular-nums; min-height: 100vh; }
+  a { color: var(--moss); text-decoration: none; }
+  a:hover { color: var(--oxide); }
+
+  .mono { font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--graphite); }
+  .serif-italic { font-family: 'Source Serif 4', Georgia, serif; font-style: italic; }
+
+  /* ===== TOP BAR ===== */
+  .topbar { background: var(--deep-forest); padding: 14px 32px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--hairline); }
+  .topbar .brand { font-weight: 400; letter-spacing: 0.04em; font-size: 18px; }
+  .topbar .topmeta { font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--graphite); }
+
+  /* ===== HERO ===== */
+  .hero { padding: 96px 32px 64px; max-width: 1100px; margin: 0 auto; }
+  .hero .kicker { font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--moss); margin-bottom: 20px; }
+  .hero h1 { font-weight: 400; font-size: 64px; line-height: 1.05; letter-spacing: -0.02em; margin-bottom: 24px; max-width: 820px; }
+  .hero h1 .accent { color: var(--moss); }
+  .hero .lede { font-size: 18px; line-height: 1.55; color: var(--graphite); max-width: 640px; }
+  .hero .lede em { font-family: 'Source Serif 4', Georgia, serif; color: var(--ink); }
+
+  /* ===== SECTION HEADER ===== */
+  .section { max-width: 1100px; margin: 0 auto; padding: 0 32px 64px; }
+  .section-mark { display: flex; gap: 16px; align-items: center; margin-bottom: 32px; padding-top: 32px; border-top: 1px solid var(--hairline); }
+  .section-mark .label { font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--graphite); }
+  .section-mark .rule { flex: 1; height: 1px; background: var(--hairline); }
+
+  h2.section-title { font-weight: 400; font-size: 32px; letter-spacing: -0.015em; margin-bottom: 12px; }
+  p.section-lede { font-size: 16px; color: var(--graphite); max-width: 640px; margin-bottom: 32px; }
+
+  /* ===== ROLE TILES ===== */
+  .tiles { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
+  .tile { background: var(--deep-forest); border: 1px solid var(--hairline); padding: 32px; display: flex; flex-direction: column; cursor: pointer; transition: border-color 0.2s, transform 0.2s; text-decoration: none; color: var(--ink); }
+  .tile:hover { border-color: var(--moss); transform: translateY(-2px); color: var(--ink); }
+  .tile .tile-kicker { font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--moss); margin-bottom: 16px; }
+  .tile h3 { font-weight: 400; font-size: 28px; letter-spacing: -0.01em; margin-bottom: 12px; }
+  .tile .tile-desc { font-size: 13px; color: var(--graphite); line-height: 1.55; margin-bottom: 24px; flex: 1; }
+  .tile .tile-list { font-size: 12px; color: var(--graphite); line-height: 1.7; padding-left: 14px; margin: 0 0 24px; }
+  .tile .tile-list li { list-style: none; position: relative; margin-bottom: 2px; }
+  .tile .tile-list li::before { content: "—"; position: absolute; left: -14px; color: var(--moss); }
+  .tile .tile-cta { font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--moss); display: flex; align-items: center; gap: 8px; margin-top: auto; padding-top: 16px; border-top: 1px solid var(--hairline); }
+  .tile .tile-cta .arrow { transition: transform 0.2s; }
+  .tile:hover .tile-cta .arrow { transform: translateX(4px); }
+
+  /* ===== DOCS ROW ===== */
+  .docs { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .doc-card { background: var(--deep-forest); border: 1px solid var(--hairline); padding: 24px; display: flex; justify-content: space-between; align-items: center; gap: 16px; }
+  .doc-card .doc-text .doc-title { font-weight: 500; font-size: 16px; margin-bottom: 4px; }
+  .doc-card .doc-text .doc-meta { font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.1em; color: var(--graphite); text-transform: uppercase; }
+  .doc-card a.doc-btn { font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; padding: 10px 16px; border: 1px solid var(--moss); color: var(--moss); text-decoration: none; transition: background 0.2s, color 0.2s; }
+  .doc-card a.doc-btn:hover { background: var(--moss); color: var(--deep-forest); }
+
+  /* ===== STATS ===== */
+  .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0; border-top: 1px solid var(--hairline); border-bottom: 1px solid var(--hairline); }
+  .stats .stat { padding: 28px 24px; border-right: 1px solid var(--hairline); }
+  .stats .stat:last-child { border-right: none; }
+  .stats .stat .stat-num { font-size: 36px; font-weight: 400; letter-spacing: -0.02em; line-height: 1; }
+  .stats .stat .stat-label { font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--graphite); margin-top: 8px; }
+
+  /* ===== INFO ===== */
+  .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+  .info-card { background: var(--deep-forest); border: 1px solid var(--hairline); padding: 28px; }
+  .info-card h4 { font-weight: 500; font-size: 15px; margin-bottom: 12px; }
+  .info-card p { font-size: 13px; color: var(--graphite); line-height: 1.6; }
+  .info-card p + p { margin-top: 12px; }
+
+  /* ===== FOOTER ===== */
+  footer { background: var(--deep-forest); border-top: 1px solid var(--hairline); padding: 32px; margin-top: 64px; }
+  footer .footer-inner { max-width: 1100px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--graphite); }
+  footer a { color: var(--graphite); }
+  footer a:hover { color: var(--moss); }
+
+  /* ===== RESPONSIVE ===== */
+  @media (max-width: 880px) {
+    .hero { padding: 64px 24px 48px; }
+    .hero h1 { font-size: 40px; }
+    .section { padding: 0 24px 48px; }
+    .tiles, .docs, .info-grid { grid-template-columns: 1fr; }
+    .stats { grid-template-columns: 1fr 1fr; }
+    .stats .stat:nth-child(2) { border-right: none; }
+    .stats .stat:nth-child(1), .stats .stat:nth-child(2) { border-bottom: 1px solid var(--hairline); }
+    .topbar { padding: 12px 16px; }
+    footer .footer-inner { flex-direction: column; gap: 8px; align-items: flex-start; }
+  }
+
+  ::-webkit-scrollbar { width: 10px; height: 10px; }
+  ::-webkit-scrollbar-track { background: var(--bone); }
+  ::-webkit-scrollbar-thumb { background: var(--stone); }
+  ::-webkit-scrollbar-thumb:hover { background: var(--graphite); }
+</style>
+</head>
+<body>
+
+<!-- ===== TOPBAR ===== -->
+<div class="topbar">
+  <div class="brand">Celsius</div>
+  <div class="topmeta">Plataforma · Prototipo · v0.3</div>
+</div>
+
+<!-- ===== HERO ===== -->
+<section class="hero">
+  <div class="kicker">§ Acceso al prototipo · interno · confidencial</div>
+  <h1>Plataforma Celsius. <span class="accent">Tres vistas, una arquitectura.</span></h1>
+  <p class="lede">Prototipo navegable de la plataforma de cotización y gestión inmobiliaria de Celsius. Tres roles operan sobre el mismo inventario y el mismo CRM: <em>brokers</em> que cotizan y cierran, <em>clientes</em> que compran sin intermediario o consultan cotizaciones recibidas, y <em>administración</em> que configura políticas, comisiones y reportería.</p>
+</section>
+
+<!-- ===== TILES ===== -->
+<section class="section">
+  <div class="section-mark"><span class="label">§01 · Selecciona una vista</span><span class="rule"></span></div>
+
+  <div class="tiles">
+
+    <a class="tile" href="celsius-cotizador-prototipo.html">
+      <div class="tile-kicker">Vista A · Brokers</div>
+      <h3>Cotizador &amp; Pipeline</h3>
+      <p class="tile-desc">La app diaria del broker. Cotiza unidades, gestiona apartados 24h, lleva expedientes de cliente, ve sus comisiones y sigue su pipeline de cierre con un playbook guiado.</p>
+      <ul class="tile-list">
+        <li>16 secciones · Dashboard, Visualizador, Cotizador</li>
+        <li>Playbook de cierre &amp; expedientes legales</li>
+        <li>Mis comisiones &amp; Celsius Rewards</li>
+        <li>Salas, guardias, eventos y academia</li>
+      </ul>
+      <div class="tile-cta">Entrar · login broker <span class="arrow">→</span></div>
+    </a>
+
+    <a class="tile" href="celsius-portal-cliente.html">
+      <div class="tile-kicker">Vista B · Clientes</div>
+      <h3>Portal público</h3>
+      <p class="tile-desc">El sitio cara al cliente. Catálogo de proyectos, compra directa sin intermediario con el bono adicional, acceso a cotizaciones compartidas por broker, y solicitud para darse de alta como broker.</p>
+      <ul class="tile-list">
+        <li>Catálogo público &amp; visualizador del edificio</li>
+        <li>Compra directa (sé tu propio broker) +1% bono</li>
+        <li>Pago de enganche con tarjeta · Stripe</li>
+        <li>Solicitud para ser broker con upload de docs</li>
+      </ul>
+      <div class="tile-cta">Entrar · sitio público <span class="arrow">→</span></div>
+    </a>
+
+    <a class="tile" href="celsius-admin.html">
+      <div class="tile-kicker">Vista C · Admin</div>
+      <h3>Consola operativa</h3>
+      <p class="tile-desc">La consola interna de Celsius. Configura políticas globales y por proyecto, gestiona inventario, brokers, clientes, comisiones por pagar, campañas, pipeline HubSpot, audit log y reportería ejecutiva.</p>
+      <ul class="tile-list">
+        <li>17 secciones · Dashboard ejecutivo, Inventario</li>
+        <li>Políticas globales + overrides por proyecto</li>
+        <li>Comisiones · pasivos &amp; payment runs</li>
+        <li>HubSpot mapping &amp; audit log</li>
+      </ul>
+      <div class="tile-cta">Entrar · acceso admin <span class="arrow">→</span></div>
+    </a>
+
+  </div>
+</section>
+
+<!-- ===== STATS ===== -->
+<section class="section">
+  <div class="section-mark"><span class="label">§02 · Alcance del prototipo</span><span class="rule"></span></div>
+
+  <div class="stats">
+    <div class="stat">
+      <div class="stat-num">3</div>
+      <div class="stat-label">vistas funcionales</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num">36</div>
+      <div class="stat-label">secciones navegables</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num">7,000+</div>
+      <div class="stat-label">líneas de prototipo</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num">100%</div>
+      <div class="stat-label">marca Celsius aplicada</div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== DOCS ===== -->
+<section class="section">
+  <div class="section-mark"><span class="label">§03 · Documentación técnica</span><span class="rule"></span></div>
+  <h2 class="section-title">Para el equipo de implementación</h2>
+  <p class="section-lede">El documento de arquitectura técnica acompaña este prototipo. Define stack, modelo de datos, integraciones, flujos clave, y el roadmap de 6 meses para llevar el prototipo a producción.</p>
+
+  <div class="docs">
+    <div class="doc-card">
+      <div class="doc-text">
+        <div class="doc-title">Documento de arquitectura técnica</div>
+        <div class="doc-meta">.docx · stack, modelo de datos, roadmap</div>
+      </div>
+      <a class="doc-btn" href="celsius-cotizador-arquitectura.docx" download>Descargar →</a>
+    </div>
+    <div class="doc-card">
+      <div class="doc-text">
+        <div class="doc-title">Repositorio en GitHub</div>
+        <div class="doc-meta">código fuente · changelog · issues</div>
+      </div>
+      <a class="doc-btn" href="#" target="_blank" rel="noopener">Ver repo →</a>
+    </div>
+  </div>
+</section>
+
+<!-- ===== INFO ===== -->
+<section class="section">
+  <div class="section-mark"><span class="label">§04 · Notas</span><span class="rule"></span></div>
+
+  <div class="info-grid">
+    <div class="info-card">
+      <h4>¿Cómo navego el prototipo?</h4>
+      <p>Cada vista (Broker, Cliente, Admin) abre como una app independiente. Dentro de cada una hay un sidebar (Broker, Admin) o top-nav (Cliente) que permite saltar entre todas las secciones funcionales. Los datos mostrados son representativos pero no en vivo — el prototipo demuestra interacciones, no operación real.</p>
+      <p>Las tres vistas están interconectadas vía una barra superior negra que permite saltar entre ellas sin perder contexto.</p>
+    </div>
+    <div class="info-card">
+      <h4>¿Qué representa la marca?</h4>
+      <p>Los prototipos aplican la paleta de Celsius (charcoal <span class="serif-italic">#383838</span>, cyan <span class="serif-italic">#009DEA</span>, texto claro <span class="serif-italic">#F5F5F5</span>) extraída del sitio institucional <a href="https://0celsius.mx/" target="_blank" rel="noopener">0celsius.mx</a>. Tipografía: Inter Tight como sans primaria, JetBrains Mono para metadata, Source Serif 4 italic para acentos editoriales.</p>
+      <p>El prototipo es la traducción operativa de la marca institucional al producto digital.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ===== FOOTER ===== -->
+<footer>
+  <div class="footer-inner">
+    <div>Celsius · Prototipo de plataforma · v0.3</div>
+    <div><a href="mailto:contacto@0celsius.mx">contacto@0celsius.mx</a> · Confidencial</div>
+  </div>
+</footer>
+
+</body>
+</html>
