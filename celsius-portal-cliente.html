@@ -1,0 +1,1008 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Celsius · Compra tu departamento</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600&family=JetBrains+Mono:wght@400;500&family=Source+Serif+4:ital,wght@1,400&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    /* Celsius — paleta extraída de 0celsius.mx · dark theme */
+    --ink: #F5F5F5;
+    --bone: #383838;
+    --deep-forest: #1E1E1E;
+    --stone: #4A4A4A;
+    --graphite: #B5B5B5;
+    --moss: #009DEA;
+    --oxide: #38A9FF;
+    --sage: #80C5F0;
+    --hairline: rgba(255,255,255,0.10);
+    --hairline-strong: rgba(255,255,255,0.24);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { background: var(--bone); color: var(--ink); font-family: 'Inter Tight', sans-serif; font-size: 15px; line-height: 1.55; -webkit-font-smoothing: antialiased; font-variant-numeric: tabular-nums; }
+  .mono { font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--graphite); }
+  .serif-italic { font-family: 'Source Serif 4', Georgia, serif; font-style: italic; }
+  a { color: var(--moss); text-decoration: none; }
+
+  /* ===== ROLE SWITCHER ===== */
+  .role-bar { background: var(--deep-forest); color: var(--ink); padding: 8px 24px; display: flex; justify-content: space-between; align-items: center; font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; }
+  .role-bar .switcher { display: flex; gap: 12px; }
+  .role-bar .switcher a { color: var(--sage); }
+  .role-bar .switcher a.active { color: var(--ink); border-bottom: 1px solid var(--moss); padding-bottom: 2px; }
+
+  /* ===== TOP NAV (public site) ===== */
+  .topnav { background: var(--bone); padding: 16px 32px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--hairline); position: sticky; top: 0; z-index: 40; }
+  .topnav .brand { display: flex; align-items: center; gap: 12px; cursor: pointer; }
+  .topnav .brand .acorn { font-weight: 500; letter-spacing: 0.12em; font-size: 11px; color: var(--graphite); }
+  .topnav .brand .sub { font-weight: 400; letter-spacing: 0.04em; font-size: 20px; }
+  .topnav nav { display: flex; gap: 28px; align-items: center; }
+  .topnav nav a { font-size: 13px; color: var(--ink); cursor: pointer; padding: 4px 0; }
+  .topnav nav a.active { border-bottom: 1px solid var(--ink); }
+  .topnav nav a:hover { color: var(--moss); }
+  .topnav .topcta { display: flex; gap: 8px; align-items: center; }
+
+  /* ===== CONTAINER ===== */
+  .container { max-width: 1100px; margin: 0 auto; padding: 32px; }
+  .container.narrow { max-width: 720px; }
+
+  /* ===== HERO ===== */
+  .hero { background: var(--deep-forest); color: var(--ink); padding: 80px 32px; position: relative; }
+  .hero .hero-inner { max-width: 1100px; margin: 0 auto; }
+  .hero .mono { color: var(--sage); margin-bottom: 16px; }
+  .hero h1 { font-weight: 400; font-size: 64px; line-height: 1.05; letter-spacing: -0.02em; margin-bottom: 16px; max-width: 720px; }
+  .hero .lede { font-size: 18px; color: var(--sage); max-width: 560px; margin-bottom: 32px; line-height: 1.5; }
+  .hero .lede em { font-family: 'Source Serif 4', Georgia, serif; color: var(--ink); }
+
+  /* ===== ENTRY CARDS ===== */
+  .entry-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-top: 40px; }
+  .entry-card { background: var(--bone); border: 1px solid var(--hairline); padding: 28px; cursor: pointer; display: flex; flex-direction: column; transition: border-color 0.15s; }
+  .entry-card:hover { border-color: var(--ink); }
+  .entry-card .ec-mono { font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--graphite); margin-bottom: 12px; }
+  .entry-card h3 { font-weight: 400; font-size: 22px; letter-spacing: -0.01em; margin-bottom: 12px; }
+  .entry-card p { font-size: 14px; color: var(--graphite); line-height: 1.5; margin-bottom: 20px; }
+  .entry-card .ec-cta { margin-top: auto; font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.08em; color: var(--moss); }
+
+  /* ===== SECTION HEADER ===== */
+  .section-mark { display: flex; gap: 16px; align-items: center; margin: 0 0 16px; }
+  .section-mark .label { font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--graphite); }
+  .section-mark .rule { flex: 1; height: 1px; background: var(--hairline-strong); }
+  h1.display { font-weight: 400; font-size: 40px; line-height: 1.1; letter-spacing: -0.015em; margin-bottom: 12px; }
+  h2 { font-weight: 400; font-size: 26px; letter-spacing: -0.01em; margin-bottom: 8px; }
+  h3 { font-weight: 500; font-size: 16px; margin-bottom: 8px; }
+  p.lede { font-size: 16px; color: var(--graphite); line-height: 1.55; }
+  p.lede em { font-family: 'Source Serif 4', Georgia, serif; }
+
+  /* ===== CARDS ===== */
+  .card { background: var(--bone); border: 1px solid var(--hairline); padding: 24px; }
+  .card + .card { margin-top: 16px; }
+  .card.dark { background: var(--deep-forest); color: var(--ink); border-color: var(--ink); }
+  .card.dark .mono { color: var(--sage); }
+
+  /* ===== PROJECT GRID ===== */
+  .proj-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+  .proj-card { background: var(--bone); border: 1px solid var(--hairline); padding: 0; overflow: hidden; cursor: pointer; transition: border-color 0.15s; }
+  .proj-card:hover { border-color: var(--ink); }
+  .proj-card .pcover { background: var(--deep-forest); aspect-ratio: 16/10; display: grid; place-items: center; }
+  .proj-card .pcover svg { width: 60%; height: 60%; }
+  .proj-card .pbody { padding: 20px; }
+  .proj-card .pmeta { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+  .proj-card .pname { font-weight: 500; font-size: 20px; margin-bottom: 4px; letter-spacing: -0.01em; }
+  .proj-card .ploc { font-size: 13px; color: var(--graphite); margin-bottom: 12px; }
+  .proj-card .pstats { display: flex; gap: 16px; font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--graphite); letter-spacing: 0.04em; }
+
+  /* ===== TAG ===== */
+  .tag { display: inline-flex; align-items: center; gap: 6px; font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; padding: 4px 8px; border: 1px solid var(--hairline-strong); }
+  .tag.ok { background: var(--moss); color: var(--ink); border-color: var(--moss); }
+  .tag.warn { background: var(--oxide); color: var(--ink); border-color: var(--oxide); }
+  .tag.draft { background: var(--stone); }
+
+  /* ===== FORMS ===== */
+  .form-field { display: flex; flex-direction: column; gap: 6px; margin-bottom: 20px; }
+  .form-field label { font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--graphite); }
+  .form-field input, .form-field select, .form-field textarea { padding: 12px 14px; border: 1px solid var(--hairline-strong); background: var(--bone); font-family: 'Inter Tight', sans-serif; font-size: 14px; color: var(--ink); }
+  .form-field input:focus, .form-field select:focus, .form-field textarea:focus { outline: 2px solid var(--moss); outline-offset: -1px; }
+  .form-field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .form-field-row3 { display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 12px; }
+
+  /* ===== BUTTONS ===== */
+  button.btn, a.btn { all: unset; cursor: pointer; padding: 12px 20px; font-size: 14px; font-weight: 500; border: 1px solid var(--ink); background: var(--bone); color: var(--ink); text-align: center; display: inline-flex; align-items: center; justify-content: center; gap: 8px; }
+  button.btn.full, a.btn.full { width: 100%; }
+  button.btn:hover, a.btn:hover { background: var(--deep-forest); color: var(--ink); }
+  button.btn.primary, a.btn.primary { background: var(--deep-forest); color: var(--ink); }
+  button.btn.primary:hover, a.btn.primary:hover { background: var(--moss); border-color: var(--moss); }
+  button.btn.ghost, a.btn.ghost { border-color: var(--hairline-strong); }
+  button.btn.small, a.btn.small { padding: 8px 14px; font-size: 12px; }
+  button.btn.large, a.btn.large { padding: 16px 24px; font-size: 15px; }
+  button.btn.light, a.btn.light { background: var(--bone); color: var(--ink); border-color: var(--ink); }
+  button.btn.light:hover { background: var(--sage); border-color: var(--sage); }
+
+  /* ===== UPLOAD ===== */
+  .upload-row { display: grid; grid-template-columns: 1fr 80px 80px; gap: 12px; padding: 14px 0; border-bottom: 1px solid var(--hairline); align-items: center; }
+  .upload-row .uname { font-size: 13px; }
+  .upload-row .uname .udesc { font-family: 'JetBrains Mono'; font-size: 9px; letter-spacing: 0.08em; color: var(--graphite); text-transform: uppercase; margin-top: 2px; }
+  .upload-row .ustatus { font-family: 'JetBrains Mono'; font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; }
+  .upload-row .ustatus.pending { color: var(--graphite); }
+  .upload-row .ustatus.uploaded { color: var(--moss); }
+  .upload-box { border: 1px dashed var(--hairline-strong); padding: 24px; text-align: center; background: var(--stone); margin: 16px 0; }
+  .upload-box .uplabel { font-family: 'JetBrains Mono'; font-size: 11px; letter-spacing: 0.08em; color: var(--graphite); }
+
+  /* ===== STEPS ===== */
+  .steps { display: flex; justify-content: space-between; padding: 16px 0; border-bottom: 1px solid var(--hairline); margin-bottom: 24px; }
+  .steps .step { flex: 1; text-align: center; padding: 0 8px; position: relative; }
+  .steps .step .num { width: 28px; height: 28px; border: 1px solid var(--hairline-strong); border-radius: 50%; display: grid; place-items: center; font-family: 'JetBrains Mono'; font-size: 11px; margin: 0 auto 6px; color: var(--graphite); }
+  .steps .step.active .num { background: var(--deep-forest); color: var(--ink); border-color: var(--ink); }
+  .steps .step.done .num { background: var(--moss); color: var(--ink); border-color: var(--moss); }
+  .steps .step .stxt { font-family: 'JetBrains Mono'; font-size: 9px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--graphite); }
+  .steps .step.active .stxt { color: var(--ink); }
+  .steps .step:not(:last-child)::after { content: ""; position: absolute; top: 14px; right: -50%; width: 100%; height: 1px; background: var(--hairline); }
+
+  /* ===== QUOTE LINES ===== */
+  .price-row { display: flex; justify-content: space-between; padding: 8px 0; font-size: 14px; }
+  .price-row .label { color: var(--graphite); }
+  .price-row.discount .amount { color: var(--moss); }
+  .price-row.grand { padding: 16px 0 8px; border-top: 1px solid var(--hairline-strong); margin-top: 8px; font-size: 18px; font-weight: 500; }
+  .specs-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; padding: 16px 0; border-top: 1px solid var(--hairline); border-bottom: 1px solid var(--hairline); margin: 16px 0; }
+  .specs-grid .sp-label { font-family: 'JetBrains Mono'; font-size: 9px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--graphite); }
+  .specs-grid .sp-value { font-size: 15px; margin-top: 2px; }
+
+  /* ===== CC FORM ===== */
+  .cc-card-preview { background: var(--deep-forest); color: var(--ink); padding: 24px; aspect-ratio: 1.6/1; max-width: 360px; margin-bottom: 24px; position: relative; }
+  .cc-card-preview .chip { width: 32px; height: 24px; background: var(--sage); margin-bottom: 32px; }
+  .cc-card-preview .ccnum { font-family: 'JetBrains Mono'; font-size: 18px; letter-spacing: 0.16em; margin-bottom: 16px; }
+  .cc-card-preview .ccbottom { display: flex; justify-content: space-between; }
+  .cc-card-preview .cclabel { font-family: 'JetBrains Mono'; font-size: 9px; letter-spacing: 0.1em; color: var(--sage); text-transform: uppercase; }
+  .cc-card-preview .ccvalue { font-family: 'JetBrains Mono'; font-size: 12px; margin-top: 2px; letter-spacing: 0.04em; }
+  .cc-card-preview .stripe-mark { position: absolute; top: 24px; right: 24px; font-family: 'JetBrains Mono'; font-size: 10px; color: var(--sage); letter-spacing: 0.1em; }
+  .cc-trust { display: flex; gap: 8px; align-items: center; margin: 16px 0; padding: 12px; background: var(--stone); font-size: 12px; }
+  .cc-trust .lock { font-family: 'JetBrains Mono'; font-size: 10px; color: var(--moss); letter-spacing: 0.08em; }
+
+  /* ===== SUCCESS ===== */
+  .success-card { background: var(--moss); color: var(--ink); padding: 32px; text-align: center; }
+  .success-card .check { width: 64px; height: 64px; border: 1px solid var(--bone); border-radius: 50%; display: grid; place-items: center; margin: 0 auto 16px; font-size: 28px; }
+  .success-card h1 { font-weight: 400; font-size: 28px; letter-spacing: -0.01em; margin-bottom: 8px; color: var(--ink); }
+  .success-card p { color: var(--sage); }
+
+  /* ===== VIEWS ===== */
+  section.view { display: none; }
+  section.view.active { display: block; }
+
+  /* ===== FOOTER ===== */
+  footer.site-footer { background: var(--deep-forest); color: var(--ink); padding: 48px 32px 24px; margin-top: 64px; }
+  footer.site-footer .fgrid { max-width: 1100px; margin: 0 auto; display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 32px; }
+  footer.site-footer .flogo .lock { font-weight: 500; letter-spacing: 0.12em; font-size: 14px; }
+  footer.site-footer .flogo .desc { color: var(--sage); font-size: 13px; margin-top: 12px; max-width: 320px; line-height: 1.5; }
+  footer.site-footer .fcol h4 { font-family: 'JetBrains Mono'; font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--sage); margin-bottom: 12px; }
+  footer.site-footer .fcol a { display: block; font-size: 13px; color: var(--ink); padding: 4px 0; }
+  footer.site-footer .fcol a:hover { color: var(--sage); }
+  footer.site-footer .fbottom { max-width: 1100px; margin: 32px auto 0; padding-top: 16px; border-top: 1px solid var(--graphite); display: flex; justify-content: space-between; font-family: 'JetBrains Mono'; font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--sage); }
+
+  /* ===== UTILS ===== */
+  .mt-16 { margin-top: 16px; } .mt-24 { margin-top: 24px; } .mt-32 { margin-top: 32px; } .mt-48 { margin-top: 48px; }
+  .mb-16 { margin-bottom: 16px; } .mb-24 { margin-bottom: 24px; } .mb-32 { margin-bottom: 32px; } .mb-48 { margin-bottom: 48px; }
+  .text-muted { color: var(--graphite); }
+  .text-small { font-size: 13px; }
+  .flex { display: flex; } .flex-between { display: flex; justify-content: space-between; align-items: center; } .flex-col { display: flex; flex-direction: column; }
+  .gap-8 { gap: 8px; } .gap-12 { gap: 12px; } .gap-16 { gap: 16px; }
+
+  /* ===== RESPONSIVE ===== */
+  @media (max-width: 880px) {
+    .topnav { padding: 12px 16px; flex-wrap: wrap; gap: 12px; }
+    .topnav nav { gap: 16px; order: 3; width: 100%; overflow-x: auto; }
+    .container { padding: 24px 16px; }
+    .hero { padding: 48px 16px; }
+    .hero h1 { font-size: 40px; }
+    .entry-grid, .proj-grid { grid-template-columns: 1fr; }
+    .form-field-row, .form-field-row3 { grid-template-columns: 1fr; }
+    footer.site-footer .fgrid { grid-template-columns: 1fr 1fr; }
+  }
+
+  ::-webkit-scrollbar { width: 8px; height: 8px; }
+  ::-webkit-scrollbar-track { background: var(--bone); }
+  ::-webkit-scrollbar-thumb { background: var(--stone); }
+</style>
+</head>
+<body>
+
+<!-- ============== ROLE SWITCHER ============== -->
+<div class="role-bar">
+  <div>§ Prototipo · vista activa</div>
+  <div class="switcher">
+    <a href="celsius-cotizador-prototipo.html">Broker</a>
+    <a href="celsius-portal-cliente.html" class="active">Cliente</a>
+    <a href="celsius-admin.html">Admin</a>
+  </div>
+</div>
+
+<!-- ============== TOP NAV ============== -->
+<header class="topnav">
+  <div class="brand" onclick="goto('landing')">
+    <span class="sub" style="font-size:22px; letter-spacing:0.02em;">Celsius</span>
+  </div>
+  <nav>
+    <a onclick="goto('landing')" id="nav-landing">Inicio</a>
+    <a onclick="goto('catalog')" id="nav-catalog">Proyectos</a>
+    <a onclick="goto('how-it-works')" id="nav-how">Cómo funciona</a>
+    <a onclick="goto('broker-apply')" id="nav-broker">Quiero ser broker</a>
+    <a onclick="goto('shared-quote')" id="nav-shared">Tengo un código</a>
+  </nav>
+  <div class="topcta">
+    <button class="btn small ghost">Iniciar sesión</button>
+  </div>
+</header>
+
+<!-- ============================================== -->
+<!-- LANDING                                        -->
+<!-- ============================================== -->
+<section id="view-landing" class="view active">
+  <div class="hero">
+    <div class="hero-inner">
+      <div class="mono">§ Celsius · desarrollos institucionales</div>
+      <h1>Tu próximo departamento, sin intermediarios.</h1>
+      <p class="lede">Explora 300 unidades en <em>Polanco</em>, <em>Condesa</em> y <em>Coyoacán</em>. Cotiza, aparta y paga tu enganche en línea — o si lo prefieres, te conectamos con un broker autorizado.</p>
+      <div style="display:flex; gap:12px; flex-wrap:wrap;">
+        <a class="btn primary light large" onclick="goto('catalog')">Explorar departamentos →</a>
+        <a class="btn large" style="background:transparent; color:var(--ink); border-color:var(--graphite);" onclick="goto('how-it-works')">Cómo funciona</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="container">
+    <div class="section-mark"><span class="label">§01 · Tres formas de empezar</span><span class="rule"></span></div>
+    <h1 class="display">¿Cómo quieres avanzar?</h1>
+    <p class="lede mb-32">Cada cliente entra a Celsius por un camino distinto. Elige el tuyo.</p>
+
+    <div class="entry-grid">
+      <div class="entry-card" onclick="goto('catalog')">
+        <div class="ec-mono">RUTA 01 · COMPRA DIRECTA</div>
+        <h3>Sé tu propio broker</h3>
+        <p>Navega el catálogo, agenda una visita al showroom, genera tu cotización, paga tu enganche en línea y reserva tu unidad. Sin intermediarios — y con bono adicional del 1% por ser cliente directo.</p>
+        <div class="ec-cta">Empezar →</div>
+      </div>
+      <div class="entry-card" onclick="goto('shared-quote')">
+        <div class="ec-mono">RUTA 02 · TENGO UN CÓDIGO</div>
+        <h3>Cotización compartida</h3>
+        <p>Si un broker autorizado de Celsius o de una inmobiliaria con convenio te compartió una cotización, ingresa con el código que recibiste y continúa el proceso desde donde quedaste.</p>
+        <div class="ec-cta">Acceder con código →</div>
+      </div>
+      <div class="entry-card" onclick="goto('broker-apply')">
+        <div class="ec-mono">RUTA 03 · QUIERO PAUTAR</div>
+        <h3>Solicita ser broker</h3>
+        <p>Si eres asesor inmobiliario y quieres comercializar nuestros proyectos, súbete los documentos requeridos y aplica. Comisiones desde 2.5% + programa Celsius Rewards.</p>
+        <div class="ec-cta">Aplicar →</div>
+      </div>
+    </div>
+
+    <div class="card mt-48 dark">
+      <div class="mono mb-16">§ Datos</div>
+      <h2 style="color:var(--ink);">300 unidades. 3 desarrollos. Una sola plataforma.</h2>
+      <div style="display:grid; grid-template-columns:repeat(4,1fr); gap:24px; margin-top:32px;">
+        <div><div style="font-size:36px; letter-spacing:-0.01em;">192</div><div class="mono" style="color:var(--sage); font-size:10px;">UNIDADES DISPONIBLES</div></div>
+        <div><div style="font-size:36px; letter-spacing:-0.01em;">3</div><div class="mono" style="color:var(--sage); font-size:10px;">DESARROLLOS ACTIVOS</div></div>
+        <div><div style="font-size:36px; letter-spacing:-0.01em;">$3.8M–$14.8M</div><div class="mono" style="color:var(--sage); font-size:10px;">RANGO MXN</div></div>
+        <div><div style="font-size:36px; letter-spacing:-0.01em;">24 h</div><div class="mono" style="color:var(--sage); font-size:10px;">PARA APARTAR EN LÍNEA</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================== -->
+<!-- CATALOG (public projects)                      -->
+<!-- ============================================== -->
+<section id="view-catalog" class="view">
+  <div class="container">
+    <div class="section-mark"><span class="label">§02 · Catálogo público · 3 proyectos activos</span><span class="rule"></span></div>
+    <h1 class="display">Nuestros desarrollos</h1>
+    <p class="lede mb-32">Tres proyectos diseñados con la misma <em class="serif-italic">precisión arquitectónica</em>: ubicación caminable, materiales nobles, certificación LEED, amenidades pensadas para vivir todo el día. Click en cualquier proyecto para ver disponibilidad en tiempo real.</p>
+
+    <div class="proj-grid">
+      <div class="proj-card" onclick="goto('project-detail')">
+        <div class="pcover">
+          <svg viewBox="0 0 100 100"><rect x="20" y="20" width="60" height="70" fill="#A7B3A5" opacity="0.3"/><rect x="30" y="30" width="40" height="50" fill="none" stroke="#F5F3EE" stroke-width="0.5"/><line x1="30" y1="42" x2="70" y2="42" stroke="#F5F3EE" stroke-width="0.3"/><line x1="30" y1="54" x2="70" y2="54" stroke="#F5F3EE" stroke-width="0.3"/><line x1="30" y1="66" x2="70" y2="66" stroke="#F5F3EE" stroke-width="0.3"/></svg>
+        </div>
+        <div class="pbody">
+          <div class="pmeta"><span class="mono">SOLAR</span><span class="tag ok">Venta activa</span></div>
+          <div class="pname">Solar</div>
+          <div class="ploc">Polanco · 14 niveles · Entrega Q4 2027</div>
+          <div class="pstats"><span>120 UNID</span><span>63 DISP</span><span>$6.4–14.8M</span></div>
+        </div>
+      </div>
+
+      <div class="proj-card" onclick="goto('project-detail')">
+        <div class="pcover">
+          <svg viewBox="0 0 100 100"><rect x="15" y="35" width="32" height="55" fill="#A7B3A5" opacity="0.3"/><rect x="53" y="25" width="32" height="65" fill="#A7B3A5" opacity="0.3"/><line x1="15" y1="50" x2="47" y2="50" stroke="#F5F3EE" stroke-width="0.4"/><line x1="53" y1="40" x2="85" y2="40" stroke="#F5F3EE" stroke-width="0.4"/></svg>
+        </div>
+        <div class="pbody">
+          <div class="pmeta"><span class="mono">ATRIO</span><span class="tag ok">Venta activa</span></div>
+          <div class="pname">Atrio</div>
+          <div class="ploc">Condesa · 2 torres · Entrega Q2 2027</div>
+          <div class="pstats"><span>84 UNID</span><span>41 DISP</span><span>$4.9–9.2M</span></div>
+        </div>
+      </div>
+
+      <div class="proj-card" onclick="goto('project-detail')">
+        <div class="pcover">
+          <svg viewBox="0 0 100 100"><polygon points="50,15 20,90 80,90" fill="#A7B3A5" opacity="0.3"/><line x1="32" y1="60" x2="68" y2="60" stroke="#F5F3EE" stroke-width="0.4"/><line x1="38" y1="45" x2="62" y2="45" stroke="#F5F3EE" stroke-width="0.4"/></svg>
+        </div>
+        <div class="pbody">
+          <div class="pmeta"><span class="mono">CIMA</span><span class="tag warn">Pre-venta · early bird 7%</span></div>
+          <div class="pname">Cima</div>
+          <div class="ploc">Coyoacán · 18 niveles · Entrega Q1 2029</div>
+          <div class="pstats"><span>96 UNID</span><span>88 DISP</span><span>$3.8–11.6M</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card mt-32" style="background:var(--stone); border-color:var(--stone);">
+      <div class="flex-between" style="flex-wrap:wrap; gap:16px;">
+        <div>
+          <h3>¿Prefieres conocerlos en persona?</h3>
+          <p class="text-small text-muted">Agenda una visita a cualquiera de nuestros tres showrooms — sin compromiso.</p>
+        </div>
+        <a class="btn" onclick="goto('book-visit')">Agendar visita →</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================== -->
+<!-- PROJECT DETAIL (Solar)                         -->
+<!-- ============================================== -->
+<section id="view-project-detail" class="view">
+  <div class="container">
+    <div class="mono mb-16"><a onclick="goto('catalog')">← Volver a proyectos</a></div>
+    <div class="section-mark"><span class="label">§03 · Solar · Polanco · 14 niveles</span><span class="rule"></span></div>
+    <h1 class="display">Solar</h1>
+    <p class="lede">14 niveles sobre Av. Horacio, frente al Bosque de Chapultepec. <em class="serif-italic">120 departamentos</em> de 1 a 3 recámaras + 4 penthouses. Entrega <em class="serif-italic">Q4 2027</em>. Certificación LEED Gold target.</p>
+
+    <div style="display:grid; grid-template-columns:2fr 1fr; gap:24px; margin-top:32px;">
+      <div>
+        <div class="card">
+          <h3>Disponibilidad en tiempo real</h3>
+          <div class="mono text-small mt-8 mb-16">Click cualquier unidad para ver detalle y cotizar.</div>
+          <svg viewBox="0 0 600 480" style="width:100%; height:auto; background:var(--bone);">
+            <rect x="60" y="30" width="480" height="420" fill="none" stroke="#111" stroke-width="1"/>
+            <g id="grid-units"></g>
+          </svg>
+          <div style="display:flex; gap:16px; margin-top:16px; flex-wrap:wrap;">
+            <span class="mono" style="display:flex; gap:6px; align-items:center;"><span style="width:8px; height:8px; background:#556B5D; border-radius:50%; display:inline-block;"></span>Disponible (63)</span>
+            <span class="mono" style="display:flex; gap:6px; align-items:center;"><span style="width:8px; height:8px; background:#7B6658; border-radius:50%; display:inline-block;"></span>Apartada (24)</span>
+            <span class="mono" style="display:flex; gap:6px; align-items:center;"><span style="width:8px; height:8px; background:#2D2D2D; border-radius:50%; display:inline-block;"></span>Vendida (33)</span>
+          </div>
+        </div>
+
+        <div class="card mt-24">
+          <h3>Ficha técnica</h3>
+          <div class="specs-grid">
+            <div><div class="sp-label">Ubicación</div><div class="sp-value">Av. Horacio 1830, Polanco</div></div>
+            <div><div class="sp-label">Niveles</div><div class="sp-value">14 + PB comercial</div></div>
+            <div><div class="sp-label">Unidades</div><div class="sp-value">120</div></div>
+            <div><div class="sp-label">Tipologías</div><div class="sp-value">1R, 2R, 3R + PH</div></div>
+            <div><div class="sp-label">m² construcción</div><div class="sp-value">58 – 215</div></div>
+            <div><div class="sp-label">Amenidades</div><div class="sp-value">Roof, gym, lounge, coworking</div></div>
+            <div><div class="sp-label">Cajones</div><div class="sp-value">1.5 prom · cargador EV</div></div>
+            <div><div class="sp-label">Certificación</div><div class="sp-value">LEED Gold target</div></div>
+          </div>
+          <div style="display:flex; gap:8px; flex-wrap:wrap;">
+            <button class="btn small ghost">Descargar brochure PDF</button>
+            <button class="btn small ghost">Ver renders</button>
+            <button class="btn small ghost">Ver memoria descriptiva</button>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div class="card">
+          <div class="mono mb-8">UNIDAD SELECCIONADA</div>
+          <h2>Depto. 805</h2>
+          <div><span class="tag ok">Disponible</span></div>
+          <div style="font-size:28px; letter-spacing:-0.01em; margin:16px 0;">MXN 8,420,000</div>
+          <div class="specs-grid">
+            <div><div class="sp-label">Recámaras</div><div class="sp-value">2</div></div>
+            <div><div class="sp-label">m² const</div><div class="sp-value">92</div></div>
+            <div><div class="sp-label">Terraza</div><div class="sp-value">14 m²</div></div>
+            <div><div class="sp-label">Vista</div><div class="sp-value">Bosque Chapultepec</div></div>
+          </div>
+          <button class="btn primary full" onclick="goto('self-quote')">Cotizar esta unidad →</button>
+          <button class="btn ghost full mt-8" onclick="goto('book-visit')">Agendar visita</button>
+        </div>
+
+        <div class="card dark mt-16">
+          <div class="mono">BONO POR COMPRA DIRECTA</div>
+          <h3 style="color:var(--ink); margin-top:8px;">+1% adicional</h3>
+          <p class="text-small" style="color:var(--sage);">Por comprar sin intermediario obtienes 1% adicional de descuento sobre el precio neto. Se suma al bono de pre-venta vigente.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================== -->
+<!-- SELF QUOTE (be your own broker)                -->
+<!-- ============================================== -->
+<section id="view-self-quote" class="view">
+  <div class="container narrow">
+    <div class="steps">
+      <div class="step done"><div class="num">✓</div><div class="stxt">Unidad</div></div>
+      <div class="step active"><div class="num">02</div><div class="stxt">Tus datos</div></div>
+      <div class="step"><div class="num">03</div><div class="stxt">Esquema</div></div>
+      <div class="step"><div class="num">04</div><div class="stxt">Apartar</div></div>
+      <div class="step"><div class="num">05</div><div class="stxt">Pagar</div></div>
+    </div>
+
+    <div class="section-mark"><span class="label">§04 · Compra directa · sin intermediario</span><span class="rule"></span></div>
+    <h1 class="display">Solar · Depto. 805</h1>
+    <p class="lede">Estás generando tu propia cotización para el <em class="serif-italic">Depto. 805</em>. Sin broker, sin intermediarios. Recibirás un bono adicional del <strong>1%</strong> por comprar directo.</p>
+
+    <div class="card mt-24">
+      <h3>1. Tus datos</h3>
+      <div class="form-field-row mt-16">
+        <div class="form-field"><label>Nombre completo</label><input placeholder="María Rodríguez Mendoza"/></div>
+        <div class="form-field"><label>Email</label><input type="email" placeholder="maria@ejemplo.mx"/></div>
+      </div>
+      <div class="form-field-row">
+        <div class="form-field"><label>Teléfono</label><input placeholder="+52 55 1234 5678"/></div>
+        <div class="form-field"><label>RFC</label><input placeholder="ROMM850214XXX"/></div>
+      </div>
+      <div class="form-field"><label>CURP</label><input placeholder="ROMM850214MDFXXX01"/></div>
+    </div>
+
+    <div class="card mt-16">
+      <h3>2. Esquema de pago</h3>
+      <div class="form-field mt-16">
+        <label>Modalidad</label>
+        <select>
+          <option>Pagos directos a obra (recomendado)</option>
+          <option>Contado · descuento adicional 2%</option>
+          <option>Crédito hipotecario · BBVA</option>
+          <option>Crédito hipotecario · Santander</option>
+        </select>
+      </div>
+      <div class="form-field-row">
+        <div class="form-field"><label>Enganche %</label><input value="20"/></div>
+        <div class="form-field"><label>Meses durante obra</label><input value="18"/></div>
+      </div>
+    </div>
+
+    <div class="card mt-16">
+      <h3>3. Resumen</h3>
+      <div class="mt-16">
+        <div class="price-row"><span class="label">Precio de lista</span><span class="amount">MXN 8,420,000</span></div>
+        <div class="price-row discount"><span class="label">Bono pre-venta Solar (3%)</span><span class="amount">−MXN 252,600</span></div>
+        <div class="price-row discount"><span class="label">Bono compra directa (1%)</span><span class="amount">−MXN 81,674</span></div>
+        <div class="price-row"><span class="label">Precio neto</span><span class="amount"><strong>MXN 8,085,726</strong></span></div>
+        <div class="price-row"><span class="label">Enganche 20%</span><span class="amount">MXN 1,617,145</span></div>
+        <div class="price-row"><span class="label">18 mensualidades</span><span class="amount">MXN 89,841 / mes</span></div>
+        <div class="price-row"><span class="label">Saldo al cierre</span><span class="amount">MXN 4,851,432</span></div>
+        <div class="price-row grand"><span>Total</span><span>MXN 8,085,726</span></div>
+      </div>
+    </div>
+
+    <div class="card dark mt-16">
+      <h3 style="color:var(--ink);">Apartar la unidad 24h</h3>
+      <p class="text-small mt-8" style="color:var(--sage);">Al hacer click se genera tu cotización formal, se descarga el PDF, y la unidad queda apartada por 24 horas a tu nombre. Tienes ese tiempo para pagar el enganche y formalizar la reserva.</p>
+      <div class="mt-24" style="display:flex; gap:8px; flex-direction:column;">
+        <button class="btn light full" onclick="goto('pay')">Generar cotización + apartar →</button>
+        <button class="btn ghost full" style="border-color:var(--graphite); color:var(--sage);" onclick="goto('book-visit')">Mejor agendar visita primero</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================== -->
+<!-- SHARED QUOTE LOGIN (broker code)               -->
+<!-- ============================================== -->
+<section id="view-shared-quote" class="view">
+  <div class="container narrow">
+    <div class="section-mark"><span class="label">§05 · Cotización compartida por broker</span><span class="rule"></span></div>
+    <h1 class="display">Acceso con código</h1>
+    <p class="lede">Si un broker autorizado te compartió una cotización, ingresa el código de 6 dígitos que recibiste por correo o WhatsApp para revisarla, descargar el PDF y completar el apartado.</p>
+
+    <div class="card mt-32">
+      <div class="form-field">
+        <label>Correo</label>
+        <input type="email" value="maria@ejemplo.mx"/>
+      </div>
+      <div class="form-field">
+        <label>Código de cotización</label>
+        <input type="text" value="284 615" maxlength="7"/>
+      </div>
+      <button class="btn primary full" onclick="goto('pay')">Acceder a mi cotización →</button>
+      <div class="mono mt-24" style="text-align:center; font-size:10px;">El código expira en 15 minutos · reenviar código</div>
+    </div>
+
+    <div class="card mt-16" style="background:var(--stone); border-color:var(--stone);">
+      <h3>¿No tienes código?</h3>
+      <p class="text-small mt-8 text-muted">Puedes explorar el catálogo público y generar tu propia cotización sin necesidad de broker.</p>
+      <a class="btn ghost mt-16" onclick="goto('catalog')">Ver catálogo →</a>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================== -->
+<!-- PAY (same as before, shared by both flows)     -->
+<!-- ============================================== -->
+<section id="view-pay" class="view">
+  <div class="container narrow">
+    <div class="steps">
+      <div class="step done"><div class="num">✓</div><div class="stxt">Unidad</div></div>
+      <div class="step done"><div class="num">✓</div><div class="stxt">Datos</div></div>
+      <div class="step done"><div class="num">✓</div><div class="stxt">Esquema</div></div>
+      <div class="step done"><div class="num">✓</div><div class="stxt">Apartar</div></div>
+      <div class="step active"><div class="num">05</div><div class="stxt">Pagar</div></div>
+    </div>
+
+    <div class="section-mark"><span class="label">§06 · Pago de enganche · seguro</span><span class="rule"></span></div>
+    <h1 class="display">Pagar enganche</h1>
+    <p class="lede">Pago seguro vía <em class="serif-italic">Stripe</em>. Celsius no almacena los datos de tu tarjeta. Al confirmar, el Depto. 805 queda formalmente reservado a tu nombre.</p>
+
+    <div class="card mt-24">
+      <div class="flex-between mb-16">
+        <h3>Detalle</h3>
+        <span class="mono" style="font-size:10px;">Q-2614 · HOLD-3392</span>
+      </div>
+      <div class="price-row"><span class="label">Solar · Depto. 805</span><span class="amount">MXN 8,085,726</span></div>
+      <div class="price-row"><span class="label">Enganche 20%</span><span class="amount">MXN 1,617,145</span></div>
+      <div class="price-row"><span class="label">Comisión procesador 1.5%</span><span class="amount">MXN 24,257</span></div>
+      <div class="price-row grand"><span>Cargo total</span><span>MXN 1,641,402</span></div>
+    </div>
+
+    <div class="card mt-24">
+      <h3 class="mb-16">Método de pago</h3>
+      <div class="cc-card-preview">
+        <div class="stripe-mark">Stripe</div>
+        <div class="chip"></div>
+        <div class="ccnum" id="cardNumDisplay">•••• •••• •••• ••••</div>
+        <div class="ccbottom">
+          <div><div class="cclabel">TITULAR</div><div class="ccvalue" id="cardNameDisplay">Tu nombre</div></div>
+          <div><div class="cclabel">EXPIRA</div><div class="ccvalue" id="cardExpDisplay">MM/AA</div></div>
+        </div>
+      </div>
+      <div class="form-field"><label>Número de tarjeta</label><input id="cardNum" placeholder="4242 4242 4242 4242" maxlength="19" oninput="updateCard()"/></div>
+      <div class="form-field"><label>Nombre del titular</label><input id="cardName" placeholder="MARIA RODRIGUEZ" oninput="updateCard()"/></div>
+      <div class="form-field-row3">
+        <div class="form-field"><label>Vencimiento</label><input id="cardExp" placeholder="MM/AA" maxlength="5" oninput="updateCard()"/></div>
+        <div class="form-field"><label>CVC</label><input placeholder="123" maxlength="4"/></div>
+        <div class="form-field"><label>CP</label><input placeholder="11550" maxlength="5"/></div>
+      </div>
+      <div class="cc-trust">
+        <div class="lock">SSL · 256-BIT</div>
+        <div class="text-small text-muted">Procesado por <strong>Stripe</strong>. PCI-DSS Nivel 1.</div>
+      </div>
+      <div class="form-field mt-16">
+        <label>Esquema</label>
+        <select>
+          <option>Una sola exhibición</option>
+          <option>6 meses sin intereses · BBVA, Santander</option>
+          <option>12 meses con intereses</option>
+        </select>
+      </div>
+      <div style="background:var(--stone); padding:16px; margin-top:16px;">
+        <div class="text-small">
+          <strong>Condiciones:</strong> al pagar entiendo que (a) la unidad queda reservada, (b) si decido no continuar, el enganche es reembolsable parcialmente (penalización 5%), (c) tengo 60 días para firmar la promesa de compraventa.
+        </div>
+        <div class="mt-16 text-small"><input type="checkbox" id="terms"/> <label for="terms">Acepto las condiciones del apartado.</label></div>
+      </div>
+      <button class="btn primary full mt-24" onclick="goto('success')">Pagar MXN 1,641,402 →</button>
+      <button class="btn ghost full mt-8" onclick="goto('catalog')">Cancelar</button>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================== -->
+<!-- SUCCESS                                        -->
+<!-- ============================================== -->
+<section id="view-success" class="view">
+  <div class="container narrow">
+    <div class="success-card">
+      <div class="check">✓</div>
+      <h1>Solar 805 reservado</h1>
+      <p>Tu pago de MXN 1,641,402 fue procesado exitosamente.</p>
+    </div>
+    <div class="card mt-16">
+      <div class="flex-between mb-16">
+        <h3>Detalle</h3>
+        <span class="tag ok">Reservada</span>
+      </div>
+      <div class="price-row"><span class="label">Folio</span><span class="amount mono" style="font-size:13px;">CEL-2026-04832</span></div>
+      <div class="price-row"><span class="label">Charge ID</span><span class="amount mono" style="font-size:12px;">ch_3PqXa2L...8KFx</span></div>
+      <div class="price-row"><span class="label">Tarjeta</span><span class="amount">Visa •••• 4242</span></div>
+      <div class="price-row grand"><span>Total cobrado</span><span>MXN 1,641,402</span></div>
+    </div>
+    <div class="card mt-16">
+      <h3>Próximos pasos</h3>
+      <ul style="font-size:13px; color:var(--graphite); line-height:1.7; margin-top:12px; padding-left:18px;">
+        <li>Comprobante por correo · <strong>maria@ejemplo.mx</strong></li>
+        <li>Factura electrónica con tu RFC</li>
+        <li>Borrador de la promesa de compraventa para revisión</li>
+        <li>Llamada del equipo Celsius para coordinar firma (60 días)</li>
+      </ul>
+    </div>
+    <button class="btn full mt-16" onclick="goto('landing')">Volver al inicio</button>
+  </div>
+</section>
+
+<!-- ============================================== -->
+<!-- BOOK VISIT (showroom)                          -->
+<!-- ============================================== -->
+<section id="view-book-visit" class="view">
+  <div class="container narrow">
+    <div class="section-mark"><span class="label">§07 · Agenda una visita al showroom</span><span class="rule"></span></div>
+    <h1 class="display">Agendar visita</h1>
+    <p class="lede">Conoce el proyecto en persona. Selecciona showroom, fecha y hora — recibirás confirmación por correo y WhatsApp.</p>
+
+    <div class="card mt-24">
+      <div class="form-field"><label>Showroom</label>
+        <select>
+          <option>Solar · Av. Horacio 1830, Polanco</option>
+          <option>Atrio · Av. México 124, Condesa</option>
+          <option>Cima · Av. Universidad 1900, Coyoacán</option>
+        </select>
+      </div>
+      <div class="form-field-row">
+        <div class="form-field"><label>Fecha</label><input type="date" value="2026-06-05"/></div>
+        <div class="form-field"><label>Hora</label>
+          <select>
+            <option>10:00 · disponible</option>
+            <option>11:00 · disponible</option>
+            <option>12:00 · ocupado</option>
+            <option>13:00 · disponible</option>
+            <option>16:00 · disponible</option>
+            <option>17:00 · disponible</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-field-row">
+        <div class="form-field"><label>Tu nombre</label><input placeholder="María Rodríguez"/></div>
+        <div class="form-field"><label>Personas</label>
+          <select>
+            <option>Solo yo</option>
+            <option>2 personas</option>
+            <option>3 personas</option>
+            <option>4 personas</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-field-row">
+        <div class="form-field"><label>Email</label><input type="email" placeholder="maria@ejemplo.mx"/></div>
+        <div class="form-field"><label>Teléfono</label><input placeholder="+52 55 1234 5678"/></div>
+      </div>
+      <div class="form-field"><label>¿Algún proyecto que te interese especialmente?</label>
+        <textarea rows="3" placeholder="Estoy interesada en 2R con vista al bosque, presupuesto hasta MXN 9M..."></textarea>
+      </div>
+      <button class="btn primary full mt-16" onclick="alert('Cita confirmada · te enviamos confirmación por correo y WhatsApp.'); goto('landing')">Confirmar visita →</button>
+      <div class="mono mt-16" style="text-align:center; font-size:10px;">Sin compromiso · puedes reagendar hasta 4h antes</div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================== -->
+<!-- HOW IT WORKS                                   -->
+<!-- ============================================== -->
+<section id="view-how-it-works" class="view">
+  <div class="container narrow">
+    <div class="section-mark"><span class="label">§08 · Cómo funciona</span><span class="rule"></span></div>
+    <h1 class="display">El proceso, en seis pasos.</h1>
+    <p class="lede">Diseñamos el proceso para que <em class="serif-italic">tú decidas el ritmo</em>. Puedes empezar y pausar en cualquier paso — tu cotización y tu apartado están siempre vivos hasta su vencimiento.</p>
+
+    <div class="card mt-32">
+      <div style="display:flex; gap:16px; align-items:flex-start;">
+        <div style="width:36px; height:36px; background:var(--ink); color:var(--ink); display:grid; place-items:center; font-family:'JetBrains Mono'; font-size:13px; flex-shrink:0;">01</div>
+        <div>
+          <h3>Explora</h3>
+          <p class="text-small text-muted mt-8">Navega los 3 proyectos. Cada uno tiene su ficha técnica, planos descargables, visualizador del edificio con disponibilidad en vivo, brochure y renders.</p>
+        </div>
+      </div>
+    </div>
+    <div class="card mt-16">
+      <div style="display:flex; gap:16px; align-items:flex-start;">
+        <div style="width:36px; height:36px; background:var(--ink); color:var(--ink); display:grid; place-items:center; font-family:'JetBrains Mono'; font-size:13px; flex-shrink:0;">02</div>
+        <div>
+          <h3>Visita (opcional)</h3>
+          <p class="text-small text-muted mt-8">Agenda una visita guiada al showroom del proyecto. Sin compromiso, gratis, 100% online.</p>
+        </div>
+      </div>
+    </div>
+    <div class="card mt-16">
+      <div style="display:flex; gap:16px; align-items:flex-start;">
+        <div style="width:36px; height:36px; background:var(--ink); color:var(--ink); display:grid; place-items:center; font-family:'JetBrains Mono'; font-size:13px; flex-shrink:0;">03</div>
+        <div>
+          <h3>Cotiza</h3>
+          <p class="text-small text-muted mt-8">Genera tu propia cotización en menos de 5 minutos. Eliges modalidad de pago, enganche, plazo. Recibes PDF con la marca Celsius. Si compras directo recibes 1% adicional.</p>
+        </div>
+      </div>
+    </div>
+    <div class="card mt-16">
+      <div style="display:flex; gap:16px; align-items:flex-start;">
+        <div style="width:36px; height:36px; background:var(--ink); color:var(--ink); display:grid; place-items:center; font-family:'JetBrains Mono'; font-size:13px; flex-shrink:0;">04</div>
+        <div>
+          <h3>Aparta 24h</h3>
+          <p class="text-small text-muted mt-8">La unidad queda bloqueada por 24 horas a tu nombre. Nadie más puede cotizar ni comprar esa unidad mientras decides.</p>
+        </div>
+      </div>
+    </div>
+    <div class="card mt-16">
+      <div style="display:flex; gap:16px; align-items:flex-start;">
+        <div style="width:36px; height:36px; background:var(--ink); color:var(--ink); display:grid; place-items:center; font-family:'JetBrains Mono'; font-size:13px; flex-shrink:0;">05</div>
+        <div>
+          <h3>Paga el enganche</h3>
+          <p class="text-small text-muted mt-8">Paga tu enganche en línea con tarjeta de crédito o SPEI. Procesado por Stripe (PCI-DSS Nivel 1). La unidad pasa de "apartada" a "reservada".</p>
+        </div>
+      </div>
+    </div>
+    <div class="card mt-16">
+      <div style="display:flex; gap:16px; align-items:flex-start;">
+        <div style="width:36px; height:36px; background:var(--moss); color:var(--ink); display:grid; place-items:center; font-family:'JetBrains Mono'; font-size:13px; flex-shrink:0;">06</div>
+        <div>
+          <h3>Firma con Mifiel</h3>
+          <p class="text-small text-muted mt-8">Tienes 60 días para firmar la promesa de compraventa con tu e.firma SAT. El equipo Celsius coordina contigo cada paso hasta la escrituración.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================== -->
+<!-- BROKER APPLICATION                             -->
+<!-- ============================================== -->
+<section id="view-broker-apply" class="view">
+  <div class="container narrow">
+    <div class="section-mark"><span class="label">§09 · Solicitud para ser broker Celsius</span><span class="rule"></span></div>
+    <h1 class="display">Conviértete en broker Celsius</h1>
+    <p class="lede">Si eres asesor inmobiliario, ya sea independiente o de una inmobiliaria, puedes comercializar nuestros proyectos. <em class="serif-italic">2.5%</em> de comisión base + bonos por proyecto + programa <em class="serif-italic">Celsius Rewards</em>. Tu solicitud es revisada en 3 días hábiles.</p>
+
+    <div class="card mt-24">
+      <h3>Datos personales</h3>
+      <div class="form-field-row mt-16">
+        <div class="form-field"><label>Nombre completo</label><input placeholder="Nombre completo"/></div>
+        <div class="form-field"><label>Email profesional</label><input type="email" placeholder="tu@correo.com"/></div>
+      </div>
+      <div class="form-field-row">
+        <div class="form-field"><label>Teléfono</label><input placeholder="+52 55 0000 0000"/></div>
+        <div class="form-field"><label>Ciudad</label><select><option>CDMX</option><option>Guadalajara</option><option>Monterrey</option><option>Otra</option></select></div>
+      </div>
+      <div class="form-field-row">
+        <div class="form-field"><label>Años de experiencia</label><select><option>0–2</option><option>3–5</option><option>5–10</option><option>10+</option></select></div>
+        <div class="form-field"><label>Especialidad principal</label><select><option>Residencial nuevo</option><option>Residencial usado</option><option>Comercial</option><option>Lujo / premium</option></select></div>
+      </div>
+    </div>
+
+    <div class="card mt-16">
+      <h3>Afiliación profesional</h3>
+      <div class="form-field-row mt-16">
+        <div class="form-field"><label>¿Trabajas con alguna inmobiliaria?</label>
+          <select id="brokerAff" onchange="toggleAff()">
+            <option>Sí — tengo afiliación</option>
+            <option>No — soy independiente</option>
+          </select>
+        </div>
+        <div class="form-field" id="affField">
+          <label>Inmobiliaria</label>
+          <select>
+            <option>Sotheby's International Realty</option>
+            <option>Coldwell Banker</option>
+            <option>RE/MAX</option>
+            <option>Century 21</option>
+            <option>Keller Williams</option>
+            <option>Otra</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-field"><label>¿Tienes convenio actual con alguna desarrolladora?</label><input placeholder="Ej. Greatcorp, Vertical, BeGrand..."/></div>
+    </div>
+
+    <div class="card mt-16">
+      <h3>Documentación requerida</h3>
+      <p class="text-small text-muted mt-8 mb-16">Sube cada documento en formato PDF, JPG o PNG. Tamaño máximo 5MB por archivo.</p>
+
+      <div class="upload-row">
+        <div class="uname">
+          <strong>INE o pasaporte vigente</strong>
+          <div class="udesc">IDENTIFICACIÓN OFICIAL · OBLIGATORIO</div>
+        </div>
+        <button class="btn small ghost">Subir</button>
+        <span class="ustatus pending">PENDIENTE</span>
+      </div>
+      <div class="upload-row">
+        <div class="uname">
+          <strong>Constancia de situación fiscal</strong>
+          <div class="udesc">RFC SAT · OBLIGATORIO</div>
+        </div>
+        <button class="btn small ghost">Subir</button>
+        <span class="ustatus uploaded">SUBIDO</span>
+      </div>
+      <div class="upload-row">
+        <div class="uname">
+          <strong>Comprobante de domicilio</strong>
+          <div class="udesc">RECIENTE (NO MÁS DE 3 MESES) · OBLIGATORIO</div>
+        </div>
+        <button class="btn small ghost">Subir</button>
+        <span class="ustatus pending">PENDIENTE</span>
+      </div>
+      <div class="upload-row">
+        <div class="uname">
+          <strong>Cédula profesional o certificación AMPI</strong>
+          <div class="udesc">SI APLICA · OPCIONAL</div>
+        </div>
+        <button class="btn small ghost">Subir</button>
+        <span class="ustatus pending">PENDIENTE</span>
+      </div>
+      <div class="upload-row">
+        <div class="uname">
+          <strong>Carta de afiliación a inmobiliaria</strong>
+          <div class="udesc">SI APLICA · OBLIGATORIO SI ELEGISTE AFILIACIÓN</div>
+        </div>
+        <button class="btn small ghost">Subir</button>
+        <span class="ustatus pending">PENDIENTE</span>
+      </div>
+      <div class="upload-row">
+        <div class="uname">
+          <strong>Carátula bancaria</strong>
+          <div class="udesc">PARA DEPÓSITO DE COMISIONES · OBLIGATORIO</div>
+        </div>
+        <button class="btn small ghost">Subir</button>
+        <span class="ustatus pending">PENDIENTE</span>
+      </div>
+
+      <div class="upload-box mt-24">
+        <div class="uplabel">O ARRASTRA Y SUELTA TUS ARCHIVOS AQUÍ</div>
+        <p class="text-small text-muted mt-8">PDF, JPG, PNG · máximo 5MB cada uno</p>
+      </div>
+    </div>
+
+    <div class="card mt-16">
+      <h3>Conexión profesional</h3>
+      <div class="form-field mt-16"><label>LinkedIn</label><input placeholder="linkedin.com/in/tu-nombre"/></div>
+      <div class="form-field"><label>Sitio web o redes profesionales (opcional)</label><input placeholder="https://..."/></div>
+      <div class="form-field"><label>Cuéntanos brevemente por qué te interesa pautar Celsius</label>
+        <textarea rows="4" placeholder="Mi cartera de clientes está principalmente en CDMX zona poniente, busco proyectos institucionales con buen ticket promedio..."></textarea>
+      </div>
+    </div>
+
+    <div class="card mt-16" style="background:var(--stone); border-color:var(--stone);">
+      <div class="text-small">
+        <strong>Al aplicar aceptas:</strong> (a) que tus datos se procesen bajo nuestro Aviso de Privacidad, (b) que validemos los documentos subidos, (c) que si eres aceptado, firmes un convenio que regula comisiones, exclusividad por cliente, y obligaciones de confidencialidad.
+      </div>
+      <div class="mt-16 text-small"><input type="checkbox" id="brokerTerms"/> <label for="brokerTerms">Acepto las condiciones de la solicitud.</label></div>
+    </div>
+
+    <button class="btn primary full mt-24" onclick="goto('broker-applied')">Enviar solicitud →</button>
+    <div class="mono mt-16" style="text-align:center; font-size:10px;">Recibirás respuesta del equipo Celsius en 3 días hábiles.</div>
+  </div>
+</section>
+
+<!-- ============================================== -->
+<!-- BROKER APPLIED                                 -->
+<!-- ============================================== -->
+<section id="view-broker-applied" class="view">
+  <div class="container narrow">
+    <div class="success-card">
+      <div class="check">📨</div>
+      <h1>Solicitud recibida</h1>
+      <p>Folio APP-2026-00184 · te avisaremos por correo en 3 días hábiles.</p>
+    </div>
+    <div class="card mt-16">
+      <h3>Qué sigue</h3>
+      <ul style="font-size:13px; color:var(--graphite); line-height:1.7; margin-top:12px; padding-left:18px;">
+        <li><strong>Validación documental</strong> · 1 día hábil — verificamos los archivos subidos.</li>
+        <li><strong>Revisión del equipo Celsius</strong> · 1-2 días — confirmamos referencias y experiencia.</li>
+        <li><strong>Llamada de onboarding</strong> · si eres aceptado, te llamamos para firmar el convenio digital.</li>
+        <li><strong>Acceso a la plataforma</strong> · recibes credenciales, brochures, manuales de marca y acceso al programa Celsius Rewards desde el día uno.</li>
+      </ul>
+    </div>
+    <div class="card mt-16">
+      <h3>Mientras tanto</h3>
+      <p class="text-small text-muted mt-8">Puedes ver los proyectos disponibles, descargar los brochures públicos, y agendar visitas a los showrooms para conocer a fondo lo que vas a representar.</p>
+      <div class="mt-16" style="display:flex; gap:8px;">
+        <a class="btn ghost small" onclick="goto('catalog')">Ver proyectos</a>
+        <a class="btn ghost small" onclick="goto('book-visit')">Agendar visita</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================== -->
+<!-- FOOTER                                         -->
+<!-- ============================================== -->
+<footer class="site-footer">
+  <div class="fgrid">
+    <div class="flogo">
+      <div class="lock">CELSIUS</div>
+      <p class="desc">Celsius desarrolla proyectos residenciales en la Ciudad de México con enfoque institucional, materiales nobles y arquitectura editorial.</p>
+    </div>
+    <div class="fcol">
+      <h4>Proyectos</h4>
+      <a>Solar · Polanco</a>
+      <a>Atrio · Condesa</a>
+      <a>Cima · Coyoacán</a>
+    </div>
+    <div class="fcol">
+      <h4>Plataforma</h4>
+      <a onclick="goto('how-it-works')">Cómo funciona</a>
+      <a onclick="goto('book-visit')">Agendar visita</a>
+      <a onclick="goto('broker-apply')">Quiero ser broker</a>
+    </div>
+    <div class="fcol">
+      <h4>Legal</h4>
+      <a>Aviso de privacidad</a>
+      <a>Condiciones del apartado</a>
+      <a>Derechos ARCO</a>
+    </div>
+  </div>
+  <div class="fbottom">
+    <div>© 2026 Celsius Desarrollos · México</div>
+    <div>clientes@celsius.mx · +52 55 5555 5555</div>
+  </div>
+</footer>
+
+<script>
+  // ====== NAV ======
+  function goto(view) {
+    document.querySelectorAll('section.view').forEach(s => s.classList.remove('active'));
+    const el = document.getElementById('view-' + view);
+    if (el) el.classList.add('active');
+    document.querySelectorAll('.topnav nav a').forEach(a => a.classList.remove('active'));
+    const navMap = {
+      landing: 'nav-landing',
+      catalog: 'nav-catalog',
+      'project-detail': 'nav-catalog',
+      'self-quote': 'nav-catalog',
+      'how-it-works': 'nav-how',
+      'broker-apply': 'nav-broker',
+      'broker-applied': 'nav-broker',
+      'shared-quote': 'nav-shared',
+      'book-visit': 'nav-how',
+    };
+    const navId = navMap[view];
+    if (navId) document.getElementById(navId).classList.add('active');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    if (view === 'project-detail') buildGrid();
+  }
+
+  // ====== CC FORM ======
+  function updateCard() {
+    let num = document.getElementById('cardNum').value.replace(/\s/g, '');
+    num = num.replace(/(\d{4})/g, '$1 ').trim();
+    document.getElementById('cardNum').value = num;
+    document.getElementById('cardNumDisplay').textContent = num || '•••• •••• •••• ••••';
+    const name = document.getElementById('cardName').value;
+    document.getElementById('cardNameDisplay').textContent = (name || 'Tu nombre').toUpperCase();
+    let exp = document.getElementById('cardExp').value.replace(/\D/g, '');
+    if (exp.length > 2) exp = exp.substring(0,2) + '/' + exp.substring(2,4);
+    document.getElementById('cardExp').value = exp;
+    document.getElementById('cardExpDisplay').textContent = exp || 'MM/AA';
+  }
+
+  // ====== BROKER AFFILIATION TOGGLE ======
+  function toggleAff() {
+    const v = document.getElementById('brokerAff').value;
+    document.getElementById('affField').style.visibility = v.includes('Sí') ? 'visible' : 'hidden';
+  }
+
+  // ====== BUILD UNITS GRID (project detail) ======
+  function buildGrid() {
+    const g = document.getElementById('grid-units');
+    if (!g || g.dataset.built) return;
+    g.dataset.built = '1';
+    const statuses = ['#556B5D','#7B6658','#2D2D2D','#556B5D','#556B5D','#2D2D2D','#556B5D','#7B6658','#556B5D','#2D2D2D','#556B5D','#556B5D'];
+    const startX = 70, startY = 38, w = 76, h = 28, gap = 4, cols = 6, floors = 14;
+    let html = '';
+    for (let f = 0; f < floors; f++) {
+      const floorNum = floors - f;
+      for (let c = 0; c < cols; c++) {
+        const x = startX + c * (w + gap);
+        const y = startY + f * (h + gap);
+        const fill = statuses[(f * cols + c) % statuses.length];
+        const id = String(floorNum).padStart(2,'0') + String(c+1).padStart(2,'0');
+        html += `<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="${fill}" stroke="#F5F3EE" style="cursor:pointer;" onclick="goto('self-quote')"/>`;
+        html += `<text x="${x + w/2}" y="${y + h/2 + 3}" text-anchor="middle" font-family="JetBrains Mono" font-size="8" fill="#F5F3EE" pointer-events="none">${id}</text>`;
+      }
+    }
+    g.innerHTML = html;
+  }
+</script>
+
+</body>
+</html>

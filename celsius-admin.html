@@ -1,0 +1,2210 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Celsius · Admin · Consola de operación</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600&family=JetBrains+Mono:wght@400;500&family=Source+Serif+4:ital,wght@1,400&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    /* Celsius — paleta extraída de 0celsius.mx · dark theme */
+    --ink: #F5F5F5;            /* texto primario · blanco */
+    --bone: #383838;           /* canvas charcoal · fondo principal */
+    --deep-forest: #1E1E1E;    /* superficies aún más oscuras: sidebar, modales */
+    --stone: #4A4A4A;          /* dividers, secciones sutiles */
+    --graphite: #B5B5B5;       /* texto secundario sobre dark */
+    --moss: #009DEA;           /* accent primario · cyan Celsius */
+    --oxide: #38A9FF;          /* accent secundario · cyan hover */
+    --sage: #80C5F0;           /* light cyan · para subtitles sobre dark */
+    --hairline: rgba(255,255,255,0.10);
+    --hairline-strong: rgba(255,255,255,0.24);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { background: var(--bone); color: var(--ink); font-family: 'Inter Tight', sans-serif; font-size: 14px; line-height: 1.5; -webkit-font-smoothing: antialiased; font-variant-numeric: tabular-nums; }
+  .mono { font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--graphite); }
+  .serif-italic { font-family: 'Source Serif 4', Georgia, serif; font-style: italic; }
+  a { color: var(--moss); text-decoration: none; }
+
+  /* ===== ROLE SWITCHER ===== */
+  .role-bar { background: var(--deep-forest); color: var(--ink); padding: 8px 24px; display: flex; justify-content: space-between; align-items: center; font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; }
+  .role-bar .switcher { display: flex; gap: 12px; }
+  .role-bar .switcher a { color: var(--sage); }
+  .role-bar .switcher a.active { color: var(--ink); border-bottom: 1px solid var(--moss); padding-bottom: 2px; }
+
+  /* ===== APP SHELL ===== */
+  .app { display: grid; grid-template-columns: 260px 1fr; min-height: calc(100vh - 32px); }
+  aside.sidebar { background: var(--deep-forest); color: var(--ink); padding: 32px 20px; display: flex; flex-direction: column; gap: 28px; position: sticky; top: 32px; height: calc(100vh - 32px); overflow-y: auto; }
+  .brand-lockup { display: flex; flex-direction: column; gap: 4px; }
+  .brand-lockup .acorn { font-weight: 500; letter-spacing: 0.12em; font-size: 14px; }
+  .brand-lockup .slash { color: var(--sage); }
+  .brand-lockup .sub { font-weight: 400; letter-spacing: 0.04em; font-size: 22px; margin-top: 6px; }
+  .brand-lockup .tag { font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--sage); margin-top: 4px; }
+  nav.side-nav { display: flex; flex-direction: column; gap: 2px; }
+  nav.side-nav .nav-section { font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--sage); margin: 14px 0 6px; }
+  nav.side-nav button { all: unset; cursor: pointer; padding: 7px 10px; border-radius: 2px; font-size: 13px; color: var(--ink); display: flex; align-items: center; gap: 10px; }
+  nav.side-nav button:hover { background: rgba(255,255,255,0.06); }
+  nav.side-nav button.active { background: var(--moss); color: var(--ink); }
+  nav.side-nav button .num { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--sage); }
+  nav.side-nav button.active .num { color: var(--ink); }
+  .sidebar-footer { margin-top: auto; font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--sage); letter-spacing: 0.06em; }
+
+  main.canvas { background: var(--bone); padding: 32px 40px 80px; }
+
+  /* ===== TOPBAR ===== */
+  .topbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
+  .topbar .crumb { font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--graphite); }
+  .topbar .crumb .sep { color: var(--hairline-strong); margin: 0 8px; }
+  .topbar .topactions { display: flex; gap: 8px; align-items: center; }
+  .topbar .topactions .env { font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.08em; padding: 4px 8px; background: var(--moss); color: var(--ink); }
+
+  /* ===== VIEWS ===== */
+  section.view { display: none; }
+  section.view.active { display: block; }
+  .view-header { margin-bottom: 24px; }
+  .view-header .section-mark { display: flex; gap: 16px; align-items: center; margin-bottom: 12px; }
+  .view-header .section-mark .label { font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--graphite); }
+  .view-header .section-mark .rule { flex: 1; height: 1px; background: var(--hairline-strong); }
+  .view-header h1 { font-weight: 400; font-size: 34px; line-height: 1.1; letter-spacing: -0.015em; margin-bottom: 8px; }
+  .view-header .lede { font-size: 15px; color: var(--graphite); max-width: 780px; }
+  .view-header .lede em { font-family: 'Source Serif 4', Georgia, serif; }
+
+  /* ===== GRID ===== */
+  .grid { display: grid; gap: 20px; }
+  .grid-2 { grid-template-columns: repeat(2, 1fr); }
+  .grid-3 { grid-template-columns: repeat(3, 1fr); }
+  .grid-4 { grid-template-columns: repeat(4, 1fr); }
+  .grid-asym { grid-template-columns: 2fr 1fr; }
+
+  /* ===== CARDS ===== */
+  .card { background: var(--bone); border: 1px solid var(--hairline); padding: 20px; }
+  .card.tight { padding: 14px; }
+  .card.dark { background: var(--deep-forest); color: var(--ink); border-color: var(--ink); }
+  .card.dark .label, .card.dark .mono { color: var(--sage); }
+  .card .label { font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--graphite); margin-bottom: 6px; }
+  .card .value { font-size: 28px; font-weight: 400; letter-spacing: -0.01em; }
+  .card .delta { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--moss); margin-top: 4px; }
+  .card .delta.neg { color: var(--oxide); }
+  .card h3 { font-weight: 500; font-size: 15px; margin-bottom: 12px; }
+  .card .desc { font-size: 13px; color: var(--graphite); line-height: 1.55; }
+
+  /* ===== BUTTONS ===== */
+  button.btn { all: unset; cursor: pointer; padding: 9px 16px; font-size: 13px; font-weight: 500; border: 1px solid var(--ink); background: var(--bone); color: var(--ink); display: inline-flex; align-items: center; gap: 8px; }
+  button.btn:hover { background: var(--deep-forest); color: var(--ink); }
+  button.btn.primary { background: var(--deep-forest); color: var(--ink); }
+  button.btn.primary:hover { background: var(--moss); border-color: var(--moss); }
+  button.btn.ghost { border-color: var(--hairline-strong); }
+  button.btn.small { padding: 6px 10px; font-size: 11px; }
+  button.btn.danger { border-color: var(--oxide); color: var(--oxide); }
+  button.btn.danger:hover { background: var(--oxide); color: var(--ink); }
+
+  /* ===== TAGS ===== */
+  .tag { display: inline-flex; align-items: center; gap: 6px; font-family: 'JetBrains Mono', monospace; font-size: 9px; letter-spacing: 0.08em; text-transform: uppercase; padding: 3px 6px; border: 1px solid var(--hairline-strong); }
+  .tag.ok { background: var(--moss); color: var(--ink); border-color: var(--moss); }
+  .tag.warn { background: var(--oxide); color: var(--ink); border-color: var(--oxide); }
+  .tag.off { background: var(--stone); color: var(--ink); }
+
+  /* ===== TABLES ===== */
+  table { width: 100%; border-collapse: collapse; font-size: 12px; }
+  table th { text-align: left; font-family: 'JetBrains Mono', monospace; font-size: 9px; font-weight: 400; letter-spacing: 0.08em; text-transform: uppercase; color: var(--graphite); padding: 8px 10px; border-bottom: 1px solid var(--hairline-strong); }
+  table td { padding: 10px 10px; border-bottom: 1px solid var(--hairline); }
+  table td.num { font-variant-numeric: tabular-nums; }
+  table tr:hover td { background: rgba(85,107,93,0.04); }
+
+  /* ===== POLICY SETTINGS ===== */
+  .policy-row { display: grid; grid-template-columns: 280px 1fr 100px; gap: 24px; padding: 18px 0; border-bottom: 1px solid var(--hairline); align-items: center; }
+  .policy-row:last-child { border-bottom: none; }
+  .policy-row .pname { display: flex; flex-direction: column; gap: 4px; }
+  .policy-row .pname strong { font-weight: 500; font-size: 14px; }
+  .policy-row .pname .pdesc { font-size: 12px; color: var(--graphite); }
+  .policy-row .pcontrol { display: flex; gap: 8px; align-items: center; }
+  .policy-row .pcontrol input, .policy-row .pcontrol select { padding: 8px 12px; border: 1px solid var(--hairline-strong); background: var(--bone); font-family: 'Inter Tight'; font-size: 13px; color: var(--ink); }
+  .policy-row .pcontrol .unit { font-family: 'JetBrains Mono'; font-size: 10px; color: var(--graphite); letter-spacing: 0.08em; }
+  .policy-row .pstate { text-align: right; }
+
+  /* ===== TOGGLE ===== */
+  .toggle { width: 40px; height: 22px; background: var(--hairline-strong); border-radius: 12px; position: relative; cursor: pointer; transition: background 0.2s; }
+  .toggle.on { background: var(--moss); }
+  .toggle::after { content: ""; position: absolute; top: 2px; left: 2px; width: 18px; height: 18px; background: var(--bone); border-radius: 50%; transition: left 0.2s; }
+  .toggle.on::after { left: 20px; }
+
+  /* ===== TIER ROW (commission) ===== */
+  .tier-config { display: grid; grid-template-columns: 60px 1fr 100px 100px 100px; gap: 16px; padding: 14px 0; border-bottom: 1px solid var(--hairline); align-items: center; }
+  .tier-config .ttag { font-family: 'JetBrains Mono'; font-size: 10px; letter-spacing: 0.08em; padding: 3px 6px; background: var(--deep-forest); color: var(--ink); text-align: center; }
+  .tier-config input { padding: 8px 10px; border: 1px solid var(--hairline-strong); background: var(--bone); font-family: 'Inter Tight'; font-size: 13px; text-align: right; }
+  .tier-config .label-row { font-family: 'JetBrains Mono'; font-size: 9px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--graphite); padding: 6px 0; border-bottom: 1px solid var(--hairline-strong); }
+
+  /* ===== SUB-TABS ===== */
+  .subtabs { display: flex; gap: 4px; margin-bottom: 24px; border-bottom: 1px solid var(--hairline); }
+  .subtabs button { all: unset; cursor: pointer; padding: 10px 16px; font-size: 13px; font-weight: 500; color: var(--graphite); border-bottom: 2px solid transparent; margin-bottom: -1px; }
+  .subtabs button.active { color: var(--ink); border-bottom-color: var(--ink); }
+  .subtabs button:hover { color: var(--ink); }
+
+  /* ===== AUDIT ROW ===== */
+  .audit-row { display: grid; grid-template-columns: 140px 80px 1fr 80px; gap: 16px; padding: 10px 0; border-bottom: 1px solid var(--hairline); font-size: 12px; }
+  .audit-row .ts { font-family: 'JetBrains Mono'; font-size: 10px; color: var(--graphite); letter-spacing: 0.06em; }
+  .audit-row .action { font-family: 'JetBrains Mono'; font-size: 10px; padding: 2px 6px; background: var(--stone); display: inline-block; text-align: center; letter-spacing: 0.06em; text-transform: uppercase; }
+  .audit-row .action.create { background: var(--moss); color: var(--ink); }
+  .audit-row .action.update { background: var(--oxide); color: var(--ink); }
+  .audit-row .action.delete { background: var(--graphite); color: var(--ink); }
+
+  /* ===== HEALTH ===== */
+  .health-row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--hairline); font-size: 13px; }
+  .health-row:last-child { border-bottom: none; }
+  .status-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; margin-right: 6px; }
+  .status-dot.up { background: var(--moss); }
+  .status-dot.warn { background: var(--oxide); }
+  .status-dot.down { background: var(--ink); }
+
+  /* ===== HUBSPOT MAPPING ===== */
+  .mapping-row { display: grid; grid-template-columns: 1fr 40px 1fr 100px; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--hairline); align-items: center; font-size: 13px; }
+  .mapping-row .arrow { text-align: center; color: var(--graphite); }
+  .mapping-row code { font-family: 'JetBrains Mono'; font-size: 11px; background: var(--stone); padding: 2px 6px; }
+
+  /* ===== UTILS ===== */
+  .mt-16 { margin-top: 16px; } .mt-24 { margin-top: 24px; } .mt-32 { margin-top: 32px; }
+  .mb-16 { margin-bottom: 16px; } .mb-24 { margin-bottom: 24px; } .mb-32 { margin-bottom: 32px; }
+  .flex { display: flex; } .flex-between { display: flex; justify-content: space-between; align-items: center; } .gap-8 { gap: 8px; } .gap-16 { gap: 16px; }
+  .text-muted { color: var(--graphite); } .text-small { font-size: 12px; }
+
+  ::-webkit-scrollbar { width: 8px; height: 8px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--stone); }
+  ::-webkit-scrollbar-thumb:hover { background: var(--graphite); }
+
+  @media (max-width: 1100px) {
+    .app { grid-template-columns: 1fr; }
+    aside.sidebar { position: relative; height: auto; }
+    .grid-3, .grid-4 { grid-template-columns: 1fr 1fr; }
+    .grid-asym { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ============== ROLE SWITCHER ============== -->
+<div class="role-bar">
+  <div>§ Prototipo · vista activa</div>
+  <div class="switcher">
+    <a href="celsius-cotizador-prototipo.html">Broker</a>
+    <a href="celsius-portal-cliente.html">Cliente</a>
+    <a href="celsius-admin.html" class="active">Admin</a>
+  </div>
+</div>
+
+<div class="app">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="brand-lockup">
+      <div><span style="font-weight:400; letter-spacing:0.04em; font-size:24px;">Celsius</span></div>
+      <div class="tag">Admin · Consola</div>
+    </div>
+
+    <nav class="side-nav">
+      <div class="nav-section">Operación</div>
+      <button data-view="dashboard" class="active"><span class="num">§01</span> Dashboard ejecutivo</button>
+      <button data-view="inventory"><span class="num">§02</span> Inventario</button>
+      <button data-view="clients"><span class="num">§03</span> Clientes &amp; deals</button>
+      <button data-view="brokers"><span class="num">§04</span> Brokers</button>
+      <button data-view="payments"><span class="num">§05</span> Pagos &amp; reservas</button>
+
+      <div class="nav-section">Configuración</div>
+      <button data-view="policies"><span class="num">§06</span> Políticas &amp; montos</button>
+      <button data-view="project-cfg"><span class="num">§07</span> Por proyecto</button>
+      <button data-view="commissions"><span class="num">§08</span> Comisiones</button>
+      <button data-view="rewards-cfg"><span class="num">§09</span> Rewards · config</button>
+      <button data-view="campaigns"><span class="num">§10</span> Campañas</button>
+      <button data-view="rooms-cfg"><span class="num">§11</span> Salas &amp; guardias</button>
+      <button data-view="hubspot"><span class="num">§12</span> HubSpot mapping</button>
+
+      <div class="nav-section">Finanzas</div>
+      <button data-view="commissions-pay"><span class="num">§13</span> Comisiones · pasivos</button>
+
+      <div class="nav-section">Brokers &amp; gobierno</div>
+      <button data-view="applications"><span class="num">§14</span> Solicitudes de broker</button>
+      <button data-view="audit"><span class="num">§15</span> Audit log</button>
+      <button data-view="health"><span class="num">§16</span> Salud del sistema</button>
+      <button data-view="reports"><span class="num">§17</span> Reportes</button>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div>R. Valenzuela · Owner</div>
+      <div style="margin-top:4px;">CELS-ADMIN · v0.1</div>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="canvas">
+    <div class="topbar">
+      <div class="crumb"><span id="crumb-num">§01</span><span class="sep">/</span><span id="crumb-name">Dashboard ejecutivo</span></div>
+      <div class="topactions">
+        <span class="env">PRODUCCIÓN</span>
+        <button class="btn small ghost">Notificaciones · 3</button>
+        <button class="btn small primary">Soporte broker</button>
+      </div>
+    </div>
+
+    <!-- ============ DASHBOARD ============ -->
+    <section id="dashboard" class="view active">
+      <div class="view-header">
+        <div class="section-mark"><span class="label">§01 · Operating · Q2 2026 · 2026-05-28</span><span class="rule"></span></div>
+        <h1>Estado del negocio</h1>
+        <p class="lede">Vista consolidada de inventario, funnel comercial y operación financiera. Datos en vivo desde el inventario maestro y <em class="serif-italic">HubSpot</em>.</p>
+      </div>
+
+      <div class="grid grid-4 mb-24">
+        <div class="card"><div class="label">Inventario disponible</div><div class="value">192</div><div class="delta">de 300 unid. totales</div></div>
+        <div class="card"><div class="label">Apartados activos</div><div class="value">47</div><div class="delta">12 vencen en 24h</div></div>
+        <div class="card"><div class="label">Cotizaciones · mes</div><div class="value">147</div><div class="delta">+22 vs mes ant.</div></div>
+        <div class="card"><div class="label">Ventas cerradas · Q2</div><div class="value">28</div><div class="delta">MXN 218M acumulado</div></div>
+      </div>
+
+      <div class="grid grid-asym mb-24">
+        <div class="card">
+          <div class="flex-between mb-16">
+            <h3>Pipeline por etapa · 30 días</h3>
+            <button class="btn small ghost">Abrir en HubSpot ↗</button>
+          </div>
+          <table>
+            <thead><tr><th>Etapa</th><th>Deals</th><th>Monto · MXN</th><th>% conversión a sig.</th></tr></thead>
+            <tbody>
+              <tr><td>01 · Cotización borrador</td><td class="num">68</td><td class="num">462,400,000</td><td class="num">72%</td></tr>
+              <tr><td>02 · Cotización enviada</td><td class="num">49</td><td class="num">351,820,000</td><td class="num">38%</td></tr>
+              <tr><td>03 · Apartado 24h</td><td class="num">47</td><td class="num">307,200,000</td><td class="num">61%</td></tr>
+              <tr><td>04 · Reservada (con pago)</td><td class="num">29</td><td class="num">198,400,000</td><td class="num">82%</td></tr>
+              <tr><td>05 · Promesa firmada</td><td class="num">24</td><td class="num">163,600,000</td><td class="num">95%</td></tr>
+              <tr><td>06 · Ganada · escrituración</td><td class="num">28</td><td class="num">218,400,000</td><td class="num">—</td></tr>
+              <tr><td>X1 · Lost · expirado</td><td class="num text-muted">18</td><td class="num text-muted">112,000,000</td><td class="num text-muted">—</td></tr>
+              <tr><td>X2 · Lost · desistió</td><td class="num text-muted">7</td><td class="num text-muted">48,200,000</td><td class="num text-muted">—</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="card dark">
+          <h3 style="color:var(--ink);">Cobros del mes</h3>
+          <div class="mono mt-16" style="color:var(--sage);">ENGANCHES · TARJETA</div>
+          <div class="value mt-16" style="font-size:36px;">MXN 28.4M</div>
+          <div class="delta">+18% vs abril</div>
+
+          <div class="mt-24" style="border-top:1px solid var(--graphite); padding-top:16px;">
+            <div class="flex-between text-small"><span style="color:var(--sage);">Tarjeta crédito</span><span>MXN 24.1M</span></div>
+            <div class="flex-between text-small mt-8"><span style="color:var(--sage);">Tarjeta débito</span><span>MXN 3.2M</span></div>
+            <div class="flex-between text-small mt-8"><span style="color:var(--sage);">Transferencia (SPEI)</span><span>MXN 1.1M</span></div>
+          </div>
+
+          <div class="mt-24" style="border-top:1px solid var(--graphite); padding-top:16px;">
+            <div class="mono" style="color:var(--sage); font-size:10px;">COMISIONES PROCESADOR</div>
+            <div style="font-size:18px; margin-top:4px;">−MXN 420,360</div>
+            <div class="delta" style="color:var(--oxide);">1.48% efectiva</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid grid-3">
+        <div class="card">
+          <h3>Top brokers · mes</h3>
+          <table style="font-size:11px;">
+            <tbody>
+              <tr><td>01 · A. Ortega</td><td class="num">8 cierres</td></tr>
+              <tr><td>02 · R. Valenzuela</td><td class="num">6 cierres</td></tr>
+              <tr><td>03 · P. Castañeda</td><td class="num">5 cierres</td></tr>
+              <tr><td>04 · M. Solís</td><td class="num">4 cierres</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="card">
+          <h3>Apartados por vencer · 24h</h3>
+          <table style="font-size:11px;">
+            <tbody>
+              <tr><td>Solar 0805 · M. Rodríguez</td><td class="num">23h 14m</td></tr>
+              <tr><td>Atrio B-407 · F. Méndez</td><td class="num">11h 03m</td></tr>
+              <tr><td>Solar 1102 · L. Pereda</td><td class="num">8h 47m</td></tr>
+              <tr><td>Cima 0204 · J. Tagle</td><td class="num">2h 22m</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="card">
+          <h3>Alertas operativas</h3>
+          <table style="font-size:11px;">
+            <tbody>
+              <tr><td><span class="tag warn">SYNC</span></td><td>3 deals con sync HubSpot fallido</td></tr>
+              <tr><td><span class="tag warn">PAGO</span></td><td>1 cobro Stripe en review</td></tr>
+              <tr><td><span class="tag ok">OK</span></td><td>Cron de holds: corriendo</td></tr>
+              <tr><td><span class="tag ok">OK</span></td><td>Backup nocturno: completado</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ INVENTORY ============ -->
+    <section id="inventory" class="view">
+      <div class="view-header">
+        <div class="section-mark"><span class="label">§02 · Inventario maestro · 3 desarrollos · 300 unidades</span><span class="rule"></span></div>
+        <h1>Inventario</h1>
+        <p class="lede">Gestión de proyectos y unidades. CRUD completo de precios, especificaciones, status, coordenadas SVG para el visualizador, y assets asociados.</p>
+      </div>
+
+      <div class="flex-between mb-24">
+        <div class="subtabs" style="margin-bottom:0;">
+          <button class="active">Proyectos · 3</button>
+          <button>Unidades · 300</button>
+          <button>Tipologías · 14</button>
+          <button>Assets · 28</button>
+        </div>
+        <button class="btn primary small">+ Nuevo proyecto</button>
+      </div>
+
+      <div class="card">
+        <table>
+          <thead>
+            <tr><th>Proyecto</th><th>Ubicación</th><th>Unid.</th><th>Disp.</th><th>Apart.</th><th>Vend.</th><th>Precio min · MXN</th><th>Precio max · MXN</th><th>Status</th><th></th></tr>
+          </thead>
+          <tbody>
+            <tr><td><strong>Solar</strong><div class="mono" style="font-size:9px;">SOL-2026</div></td><td>Polanco</td><td class="num">120</td><td class="num">63</td><td class="num">24</td><td class="num">33</td><td class="num">6,420,000</td><td class="num">14,800,000</td><td><span class="tag ok">Venta activa</span></td><td><button class="btn small ghost">Editar</button></td></tr>
+            <tr><td><strong>Atrio</strong><div class="mono" style="font-size:9px;">ATR-2026</div></td><td>Condesa</td><td class="num">84</td><td class="num">41</td><td class="num">18</td><td class="num">25</td><td class="num">4,950,000</td><td class="num">9,200,000</td><td><span class="tag ok">Venta activa</span></td><td><button class="btn small ghost">Editar</button></td></tr>
+            <tr><td><strong>Cima</strong><div class="mono" style="font-size:9px;">CIM-2026</div></td><td>Coyoacán</td><td class="num">96</td><td class="num">88</td><td class="num">5</td><td class="num">3</td><td class="num">3,800,000</td><td class="num">11,600,000</td><td><span class="tag warn">Pre-venta</span></td><td><button class="btn small ghost">Editar</button></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="grid grid-3 mt-24">
+        <div class="card"><div class="label">Total inventario</div><div class="value">300</div><div class="delta">unidades</div></div>
+        <div class="card"><div class="label">Valor del inventario</div><div class="value" style="font-size:22px;">MXN 2,180M</div><div class="delta">precio de lista</div></div>
+        <div class="card"><div class="label">Velocidad de venta</div><div class="value">9.3</div><div class="delta">cierres / mes</div></div>
+      </div>
+    </section>
+
+    <!-- ============ CLIENTS ============ -->
+    <section id="clients" class="view">
+      <div class="view-header">
+        <div class="section-mark"><span class="label">§03 · Clientes &amp; deals · vista global</span><span class="rule"></span></div>
+        <h1>Clientes &amp; deals</h1>
+        <p class="lede">Toda la cartera de clientes consolidada. Reflejo exacto de lo que vive en HubSpot, con la capa operativa de unidad, pagos y holds.</p>
+      </div>
+
+      <div class="flex-between mb-24">
+        <div class="subtabs" style="margin-bottom:0;">
+          <button class="active">Todos · 312</button>
+          <button>En cotización · 117</button>
+          <button>Apartados · 47</button>
+          <button>Reservados · 29</button>
+          <button>Cerrados · 28</button>
+          <button>Perdidos · 91</button>
+        </div>
+        <button class="btn small ghost">Exportar CSV</button>
+      </div>
+
+      <div class="card">
+        <table>
+          <thead><tr><th>Cliente</th><th>RFC</th><th>Broker</th><th>Unidad</th><th>Etapa</th><th>Monto MXN</th><th>Pago</th><th></th></tr></thead>
+          <tbody>
+            <tr><td><strong>María Rodríguez</strong></td><td class="mono" style="font-size:10px;">ROMM850214</td><td>R. Valenzuela</td><td>Solar 805</td><td><span class="tag warn">Apartado 24h</span></td><td class="num">8,167,400</td><td><span class="tag ok">Enganche pagado</span></td><td><button class="btn small ghost">Ver</button></td></tr>
+            <tr><td><strong>Luis Pereda</strong></td><td class="mono" style="font-size:10px;">PELC780930</td><td>R. Valenzuela</td><td>Solar 1102</td><td><span class="tag off">Cotización borrador</span></td><td class="num">12,180,000</td><td>—</td><td><button class="btn small ghost">Ver</button></td></tr>
+            <tr><td><strong>Joaquín Ramírez</strong></td><td class="mono" style="font-size:10px;">RAJJ820612</td><td>A. Ortega</td><td>Atrio A-204</td><td><span class="tag off">Cotización enviada</span></td><td class="num">5,950,000</td><td>—</td><td><button class="btn small ghost">Ver</button></td></tr>
+            <tr><td><strong>Carolina Vázquez</strong></td><td class="mono" style="font-size:10px;">VACA900425</td><td>P. Castañeda</td><td>Solar 0301</td><td><span class="tag ok">Cerrado · firma</span></td><td class="num">7,300,000</td><td><span class="tag ok">Liquidado</span></td><td><button class="btn small ghost">Ver</button></td></tr>
+            <tr><td><strong>Fernanda Méndez</strong></td><td class="mono" style="font-size:10px;">MEFE880317</td><td>M. Solís</td><td>Atrio B-407</td><td><span class="tag warn">Apartado 24h</span></td><td class="num">6,840,000</td><td>Pendiente</td><td><button class="btn small ghost">Ver</button></td></tr>
+            <tr><td><strong>Javier Tagle</strong></td><td class="mono" style="font-size:10px;">TAJJ750829</td><td>D. Iturbide</td><td>Cima 0204</td><td><span class="tag warn">Apartado 24h</span></td><td class="num">4,180,000</td><td>Pendiente</td><td><button class="btn small ghost">Ver</button></td></tr>
+            <tr><td><strong>Roberto Galindo</strong></td><td class="mono" style="font-size:10px;">GARR820114</td><td>S. Mendoza</td><td>Atrio A-302</td><td><span class="tag ok">Reservado</span></td><td class="num">7,420,000</td><td><span class="tag ok">Enganche pagado</span></td><td><button class="btn small ghost">Ver</button></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ============ BROKERS ============ -->
+    <section id="brokers" class="view">
+      <div class="view-header">
+        <div class="section-mark"><span class="label">§04 · Brokers · 24 activos · 5 inmobiliarias</span><span class="rule"></span></div>
+        <h1>Brokers</h1>
+        <p class="lede">Gestión de brokers internos y externos. Permisos por proyecto, comisión personalizada, status del broker, performance Q2.</p>
+      </div>
+
+      <div class="flex-between mb-24">
+        <div class="subtabs" style="margin-bottom:0;">
+          <button class="active">Todos · 24</button>
+          <button>Internos · 9</button>
+          <button>Externos · 15</button>
+        </div>
+        <button class="btn primary small">+ Nuevo broker</button>
+      </div>
+
+      <div class="card">
+        <table>
+          <thead><tr><th>Broker</th><th>Inmobiliaria</th><th>Comisión base</th><th>Tier Rewards</th><th>Cierres Q2</th><th>Cotiz. activas</th><th>Status</th><th></th></tr></thead>
+          <tbody>
+            <tr><td><strong>R. Valenzuela</strong><div class="mono" style="font-size:9px;">rodrigo@brokers.celsius.mx</div></td><td>Celsius interno</td><td class="num">3.0%</td><td>Roble Joven</td><td class="num">8</td><td class="num">12</td><td><span class="tag ok">Activo</span></td><td><button class="btn small ghost">Editar</button></td></tr>
+            <tr><td><strong>A. Ortega</strong><div class="mono" style="font-size:9px;">andrea@brokers.celsius.mx</div></td><td>Celsius interno</td><td class="num">3.0%</td><td>Roble</td><td class="num">8</td><td class="num">9</td><td><span class="tag ok">Activo</span></td><td><button class="btn small ghost">Editar</button></td></tr>
+            <tr><td><strong>P. Castañeda</strong><div class="mono" style="font-size:9px;">pcastaneda@sothebys.mx</div></td><td>Sotheby's</td><td class="num">2.5%</td><td>Roble Joven</td><td class="num">5</td><td class="num">7</td><td><span class="tag ok">Activo</span></td><td><button class="btn small ghost">Editar</button></td></tr>
+            <tr><td><strong>M. Solís</strong><div class="mono" style="font-size:9px;">msolis@coldwell.mx</div></td><td>Coldwell Banker</td><td class="num">2.5%</td><td>Roble Joven</td><td class="num">4</td><td class="num">6</td><td><span class="tag ok">Activo</span></td><td><button class="btn small ghost">Editar</button></td></tr>
+            <tr><td><strong>D. Iturbide</strong><div class="mono" style="font-size:9px;">diego@brokers.celsius.mx</div></td><td>Celsius interno</td><td class="num">3.0%</td><td>Roble Joven</td><td class="num">3</td><td class="num">5</td><td><span class="tag ok">Activo</span></td><td><button class="btn small ghost">Editar</button></td></tr>
+            <tr><td><strong>S. Mendoza</strong><div class="mono" style="font-size:9px;">sofia@remax.mx</div></td><td>RE/MAX</td><td class="num">2.5%</td><td>Bellota</td><td class="num">2</td><td class="num">4</td><td><span class="tag ok">Activo</span></td><td><button class="btn small ghost">Editar</button></td></tr>
+            <tr><td><strong>J. Almeida</strong><div class="mono" style="font-size:9px;">jorge@brokers.celsius.mx</div></td><td>Celsius interno</td><td class="num">3.0%</td><td>Bellota</td><td class="num">2</td><td class="num">3</td><td><span class="tag warn">Onboarding</span></td><td><button class="btn small ghost">Editar</button></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ============ PAYMENTS ============ -->
+    <section id="payments" class="view">
+      <div class="view-header">
+        <div class="section-mark"><span class="label">§05 · Pagos · Stripe + SPEI · MXN 28.4M cobrados mes</span><span class="rule"></span></div>
+        <h1>Pagos y reservas</h1>
+        <p class="lede">Historial de cobros del enganche, status de procesamiento Stripe, reembolsos, disputas. Cada cobro está vinculado a un Quote y un UNIT_HOLD.</p>
+      </div>
+
+      <div class="grid grid-4 mb-24">
+        <div class="card"><div class="label">Cobros · mes</div><div class="value">29</div><div class="delta">+22% vs ant.</div></div>
+        <div class="card"><div class="label">Monto cobrado</div><div class="value" style="font-size:22px;">MXN 28.4M</div><div class="delta">enganches</div></div>
+        <div class="card"><div class="label">Comisión Stripe</div><div class="value" style="font-size:22px;">MXN 420K</div><div class="delta">1.48% efectiva</div></div>
+        <div class="card"><div class="label">Disputas abiertas</div><div class="value">0</div><div class="delta">últimos 90 días</div></div>
+      </div>
+
+      <div class="card">
+        <div class="flex-between mb-16">
+          <h3>Cobros recientes</h3>
+          <button class="btn small ghost">Abrir Stripe Dashboard ↗</button>
+        </div>
+        <table>
+          <thead><tr><th>Charge ID</th><th>Cliente</th><th>Unidad</th><th>Monto</th><th>Método</th><th>Estado</th><th>Fecha</th><th></th></tr></thead>
+          <tbody>
+            <tr><td class="mono" style="font-size:10px;">ch_3PqXa2L...8KFx</td><td>M. Rodríguez</td><td>Solar 805</td><td class="num">1,657,982</td><td>Visa •••• 4242</td><td><span class="tag ok">Liquidado</span></td><td class="mono" style="font-size:10px;">28 may · 14:47</td><td><button class="btn small ghost">Ver</button></td></tr>
+            <tr><td class="mono" style="font-size:10px;">ch_3PqW1bMr...2J7p</td><td>R. Galindo</td><td>Atrio A-302</td><td class="num">1,507,290</td><td>Mastercard •••• 8821</td><td><span class="tag ok">Liquidado</span></td><td class="mono" style="font-size:10px;">27 may · 11:14</td><td><button class="btn small ghost">Ver</button></td></tr>
+            <tr><td class="mono" style="font-size:10px;">ch_3PqVw3Ks...9G2c</td><td>C. Vázquez</td><td>Solar 0301</td><td class="num">1,481,950</td><td>Visa •••• 0067</td><td><span class="tag ok">Liquidado</span></td><td class="mono" style="font-size:10px;">22 may · 16:32</td><td><button class="btn small ghost">Ver</button></td></tr>
+            <tr><td class="mono" style="font-size:10px;">ch_3PqVk1Lz...7H5n</td><td>E. Gómez</td><td>Cima 0405</td><td class="num">848,640</td><td>SPEI · BBVA</td><td><span class="tag warn">En conciliación</span></td><td class="mono" style="font-size:10px;">22 may · 09:08</td><td><button class="btn small ghost">Ver</button></td></tr>
+            <tr><td class="mono" style="font-size:10px;">ch_3PqUd2Ms...4F8q</td><td>L. Vega</td><td>Atrio B-209</td><td class="num">1,202,400</td><td>Visa •••• 3344</td><td><span class="tag warn">3DS pendiente</span></td><td class="mono" style="font-size:10px;">21 may · 19:22</td><td><button class="btn small ghost">Ver</button></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ============ POLICIES ============ -->
+    <section id="policies" class="view">
+      <div class="view-header">
+        <div class="section-mark"><span class="label">§06 · Políticas y montos · configuración del producto</span><span class="rule"></span></div>
+        <h1>Políticas &amp; montos</h1>
+        <p class="lede">Toda la <em class="serif-italic">lógica de negocio</em> de la plataforma vive aquí. Cambia un valor y se aplica a todas las cotizaciones nuevas. Cada cambio queda registrado en el <em class="serif-italic">audit log</em>.</p>
+      </div>
+
+      <div class="subtabs">
+        <button class="active">Apartado &amp; reserva</button>
+        <button>Pagos</button>
+        <button>Esquemas de financiamiento</button>
+        <button>Bonos pre-venta</button>
+        <button>Reglas operativas</button>
+      </div>
+
+      <!-- Apartado & reserva -->
+      <div class="card mb-24">
+        <h3>Apartado &amp; reserva</h3>
+        <div class="policy-row">
+          <div class="pname">
+            <strong>Duración del apartado sin pago</strong>
+            <span class="pdesc">Tiempo que la unidad queda bloqueada para otros brokers tras emitir cotización sin enganche.</span>
+          </div>
+          <div class="pcontrol">
+            <input type="number" value="24" style="width:80px;"/>
+            <span class="unit">HORAS</span>
+          </div>
+          <div class="pstate"><span class="tag ok">Activo</span></div>
+        </div>
+
+        <div class="policy-row">
+          <div class="pname">
+            <strong>Permite extensión del apartado</strong>
+            <span class="pdesc">El broker puede solicitar +24h adicionales una vez por hold (requiere aprobación admin).</span>
+          </div>
+          <div class="pcontrol">
+            <div class="toggle on"></div>
+            <span class="unit">SÍ</span>
+          </div>
+          <div class="pstate"><span class="tag ok">Activo</span></div>
+        </div>
+
+        <div class="policy-row">
+          <div class="pname">
+            <strong>Enganche mínimo para reserva formal</strong>
+            <span class="pdesc">% del precio neto que debe cobrarse vía tarjeta o SPEI para convertir hold en reserva.</span>
+          </div>
+          <div class="pcontrol">
+            <input type="number" value="20" style="width:80px;"/>
+            <span class="unit">% PRECIO NETO</span>
+          </div>
+          <div class="pstate"><span class="tag ok">Activo</span></div>
+        </div>
+
+        <div class="policy-row">
+          <div class="pname">
+            <strong>Reembolso por cancelación · cliente</strong>
+            <span class="pdesc">Penalización si el cliente cancela después de pagar enganche y antes de firmar promesa.</span>
+          </div>
+          <div class="pcontrol">
+            <input type="number" value="5" style="width:80px;"/>
+            <span class="unit">% PENALIZACIÓN</span>
+          </div>
+          <div class="pstate"><span class="tag ok">Activo</span></div>
+        </div>
+
+        <div class="policy-row">
+          <div class="pname">
+            <strong>Plazo para firmar promesa de compraventa</strong>
+            <span class="pdesc">Días después del pago del enganche para concretar la firma con Mifiel.</span>
+          </div>
+          <div class="pcontrol">
+            <input type="number" value="60" style="width:80px;"/>
+            <span class="unit">DÍAS</span>
+          </div>
+          <div class="pstate"><span class="tag ok">Activo</span></div>
+        </div>
+
+        <div class="policy-row">
+          <div class="pname">
+            <strong>Notificar cliente antes de expirar hold</strong>
+            <span class="pdesc">Horas antes del vencimiento del hold para enviar correo recordatorio.</span>
+          </div>
+          <div class="pcontrol">
+            <input type="number" value="6" style="width:80px;"/>
+            <span class="unit">HORAS ANTES</span>
+          </div>
+          <div class="pstate"><span class="tag ok">Activo</span></div>
+        </div>
+      </div>
+
+      <!-- Pagos -->
+      <div class="card mb-24">
+        <h3>Pagos</h3>
+        <div class="policy-row">
+          <div class="pname">
+            <strong>Procesador principal</strong>
+            <span class="pdesc">Pasarela de cobro para enganche del cliente.</span>
+          </div>
+          <div class="pcontrol">
+            <select style="width:200px;">
+              <option>Stripe MXN</option>
+              <option>Conekta</option>
+              <option>Openpay</option>
+            </select>
+          </div>
+          <div class="pstate"><span class="tag ok">Conectado</span></div>
+        </div>
+
+        <div class="policy-row">
+          <div class="pname">
+            <strong>Métodos de pago aceptados</strong>
+            <span class="pdesc">Qué medios puede usar el cliente para el enganche.</span>
+          </div>
+          <div class="pcontrol" style="flex-direction:column; align-items:flex-start;">
+            <div style="display:flex; gap:12px; flex-wrap:wrap;">
+              <label style="display:flex; gap:6px; font-size:12px;"><input type="checkbox" checked/> Tarjeta crédito</label>
+              <label style="display:flex; gap:6px; font-size:12px;"><input type="checkbox" checked/> Tarjeta débito</label>
+              <label style="display:flex; gap:6px; font-size:12px;"><input type="checkbox" checked/> SPEI</label>
+              <label style="display:flex; gap:6px; font-size:12px;"><input type="checkbox"/> OXXO Pay</label>
+            </div>
+          </div>
+          <div class="pstate"><span class="tag ok">Activo</span></div>
+        </div>
+
+        <div class="policy-row">
+          <div class="pname">
+            <strong>MSI · meses sin intereses</strong>
+            <span class="pdesc">Hasta cuántos meses sin intereses ofrecer al cliente.</span>
+          </div>
+          <div class="pcontrol">
+            <select style="width:120px;">
+              <option>3 MSI</option>
+              <option selected>6 MSI</option>
+              <option>9 MSI</option>
+              <option>12 MSI</option>
+              <option>No ofrecer</option>
+            </select>
+          </div>
+          <div class="pstate"><span class="tag ok">Activo</span></div>
+        </div>
+
+        <div class="policy-row">
+          <div class="pname">
+            <strong>¿Quién absorbe la comisión del procesador?</strong>
+            <span class="pdesc">Stripe cobra ~1.5%. Define si el cliente la paga o Celsius la asume.</span>
+          </div>
+          <div class="pcontrol">
+            <select style="width:200px;">
+              <option selected>Cliente (transparente)</option>
+              <option>Celsius asume</option>
+              <option>Split 50/50</option>
+            </select>
+          </div>
+          <div class="pstate"><span class="tag ok">Activo</span></div>
+        </div>
+
+        <div class="policy-row">
+          <div class="pname">
+            <strong>Monto máximo por cobro</strong>
+            <span class="pdesc">Si el enganche supera este monto, se obliga a usar SPEI.</span>
+          </div>
+          <div class="pcontrol">
+            <input type="number" value="2000000" style="width:140px;"/>
+            <span class="unit">MXN</span>
+          </div>
+          <div class="pstate"><span class="tag ok">Activo</span></div>
+        </div>
+
+        <div class="policy-row">
+          <div class="pname">
+            <strong>3D Secure obligatorio</strong>
+            <span class="pdesc">Forzar autenticación adicional en montos altos.</span>
+          </div>
+          <div class="pcontrol">
+            <div class="toggle on"></div>
+            <span class="unit">> MXN 50,000</span>
+          </div>
+          <div class="pstate"><span class="tag ok">Activo</span></div>
+        </div>
+      </div>
+
+      <!-- Esquemas de financiamiento -->
+      <div class="card mb-24">
+        <h3>Esquemas de financiamiento permitidos</h3>
+        <div class="policy-row">
+          <div class="pname">
+            <strong>Contado</strong>
+            <span class="pdesc">Pago total al cierre, sin financiamiento.</span>
+          </div>
+          <div class="pcontrol">
+            <div class="toggle on"></div>
+          </div>
+          <div class="pstate"><span class="mono" style="font-size:10px;">BONO +2%</span></div>
+        </div>
+
+        <div class="policy-row">
+          <div class="pname">
+            <strong>Pagos directos a obra</strong>
+            <span class="pdesc">Enganche + mensualidades durante la construcción + saldo al cierre.</span>
+          </div>
+          <div class="pcontrol">
+            <div class="toggle on"></div>
+          </div>
+          <div class="pstate"><span class="mono" style="font-size:10px;">DEFAULT</span></div>
+        </div>
+
+        <div class="policy-row">
+          <div class="pname">
+            <strong>Crédito hipotecario · BBVA</strong>
+            <span class="pdesc">Convenio activo. Asesor hipotecario asignado.</span>
+          </div>
+          <div class="pcontrol">
+            <div class="toggle on"></div>
+          </div>
+          <div class="pstate"><span class="tag ok">Convenio</span></div>
+        </div>
+
+        <div class="policy-row">
+          <div class="pname">
+            <strong>Crédito hipotecario · Santander</strong>
+            <span class="pdesc">Convenio activo. Tasa preferente del 9.2%.</span>
+          </div>
+          <div class="pcontrol">
+            <div class="toggle on"></div>
+          </div>
+          <div class="pstate"><span class="tag ok">Convenio</span></div>
+        </div>
+
+        <div class="policy-row">
+          <div class="pname">
+            <strong>Crédito hipotecario · Banorte</strong>
+            <span class="pdesc">Sin convenio activo.</span>
+          </div>
+          <div class="pcontrol">
+            <div class="toggle"></div>
+          </div>
+          <div class="pstate"><span class="tag off">Inactivo</span></div>
+        </div>
+
+        <div class="policy-row">
+          <div class="pname">
+            <strong>INFONAVIT / FOVISSSTE</strong>
+            <span class="pdesc">Aplicable solo a unidades bajo MXN 5M.</span>
+          </div>
+          <div class="pcontrol">
+            <div class="toggle"></div>
+          </div>
+          <div class="pstate"><span class="tag off">Inactivo</span></div>
+        </div>
+      </div>
+
+      <!-- Bonos pre-venta -->
+      <div class="card mb-24">
+        <h3>Bonos de pre-venta por proyecto</h3>
+        <div class="policy-row">
+          <div class="pname">
+            <strong>Solar · Polanco</strong>
+            <span class="pdesc">% de descuento sobre precio de lista en pre-venta.</span>
+          </div>
+          <div class="pcontrol">
+            <input type="number" value="3" style="width:80px;" step="0.5"/>
+            <span class="unit">%</span>
+          </div>
+          <div class="pstate"><span class="tag ok">Activo</span></div>
+        </div>
+        <div class="policy-row">
+          <div class="pname">
+            <strong>Atrio · Condesa</strong>
+            <span class="pdesc">% de descuento sobre precio de lista en pre-venta.</span>
+          </div>
+          <div class="pcontrol">
+            <input type="number" value="4" style="width:80px;" step="0.5"/>
+            <span class="unit">%</span>
+          </div>
+          <div class="pstate"><span class="tag ok">Activo</span></div>
+        </div>
+        <div class="policy-row">
+          <div class="pname">
+            <strong>Cima · Coyoacán</strong>
+            <span class="pdesc">% de descuento sobre precio de lista en pre-venta.</span>
+          </div>
+          <div class="pcontrol">
+            <input type="number" value="7" style="width:80px;" step="0.5"/>
+            <span class="unit">%</span>
+          </div>
+          <div class="pstate"><span class="tag ok">Activo · early bird</span></div>
+        </div>
+      </div>
+
+      <!-- Reglas operativas -->
+      <div class="card mb-24">
+        <h3>Reglas operativas</h3>
+        <div class="policy-row">
+          <div class="pname">
+            <strong>Vigencia de cotización (sin apartar)</strong>
+            <span class="pdesc">Después de este plazo, el precio puede cambiar sin aviso.</span>
+          </div>
+          <div class="pcontrol">
+            <input type="number" value="7" style="width:80px;"/>
+            <span class="unit">DÍAS</span>
+          </div>
+          <div class="pstate"><span class="tag ok">Activo</span></div>
+        </div>
+        <div class="policy-row">
+          <div class="pname">
+            <strong>Máximo de cotizaciones activas por cliente</strong>
+            <span class="pdesc">Cuántas cotizaciones simultáneas puede tener un mismo RFC.</span>
+          </div>
+          <div class="pcontrol">
+            <input type="number" value="3" style="width:80px;"/>
+            <span class="unit">COTIZACIONES</span>
+          </div>
+          <div class="pstate"><span class="tag ok">Activo</span></div>
+        </div>
+        <div class="policy-row">
+          <div class="pname">
+            <strong>Auto-libera unidades sin movimiento</strong>
+            <span class="pdesc">Si un broker no responde mensajes al cliente en X días, se libera la unidad.</span>
+          </div>
+          <div class="pcontrol">
+            <input type="number" value="14" style="width:80px;"/>
+            <span class="unit">DÍAS</span>
+          </div>
+          <div class="pstate"><span class="tag ok">Activo</span></div>
+        </div>
+        <div class="policy-row">
+          <div class="pname">
+            <strong>Aviso de privacidad vigente</strong>
+            <span class="pdesc">Versión actual del documento legal que firman los clientes.</span>
+          </div>
+          <div class="pcontrol">
+            <span class="mono" style="font-size:11px;">v3.2 · 2026-04-12</span>
+            <button class="btn small ghost" style="margin-left:8px;">Versionar</button>
+          </div>
+          <div class="pstate"><span class="tag ok">Vigente</span></div>
+        </div>
+      </div>
+
+      <div class="flex" style="gap:8px; justify-content:flex-end;">
+        <button class="btn ghost">Descartar cambios</button>
+        <button class="btn primary">Guardar y publicar</button>
+      </div>
+      <div class="mono mt-16" style="font-size:10px; text-align:right;">Los cambios aplican a cotizaciones nuevas. Cotizaciones ya emitidas mantienen las condiciones bajo las que se generaron.</div>
+    </section>
+
+    <!-- ============ COMMISSIONS ============ -->
+    <section id="commissions" class="view">
+      <div class="view-header">
+        <div class="section-mark"><span class="label">§08 · Comisiones · esquema base + bonos</span><span class="rule"></span></div>
+        <h1>Comisiones de brokers</h1>
+        <p class="lede">Configuración del esquema de comisiones: porcentaje base por tipo de broker, bonos por <em class="serif-italic">tier Rewards</em>, bonos por proyecto en pre-venta, y reglas de pago de comisión.</p>
+      </div>
+
+      <div class="grid grid-2 mb-24">
+        <div class="card">
+          <h3>Comisión base</h3>
+          <div class="policy-row" style="grid-template-columns: 1fr 1fr 100px;">
+            <div class="pname"><strong>Broker interno Celsius</strong><span class="pdesc">Empleado o contractor exclusivo.</span></div>
+            <div class="pcontrol"><input type="number" value="3.0" style="width:80px;" step="0.1"/><span class="unit">% PRECIO NETO</span></div>
+            <div class="pstate"><span class="tag ok">Activo</span></div>
+          </div>
+          <div class="policy-row" style="grid-template-columns: 1fr 1fr 100px;">
+            <div class="pname"><strong>Broker externo · convenio</strong><span class="pdesc">Sotheby's, Coldwell, RE/MAX con contrato firmado.</span></div>
+            <div class="pcontrol"><input type="number" value="2.5" style="width:80px;" step="0.1"/><span class="unit">% PRECIO NETO</span></div>
+            <div class="pstate"><span class="tag ok">Activo</span></div>
+          </div>
+          <div class="policy-row" style="grid-template-columns: 1fr 1fr 100px;">
+            <div class="pname"><strong>Broker freelance · sin convenio</strong><span class="pdesc">Operación caso por caso.</span></div>
+            <div class="pcontrol"><input type="number" value="2.0" style="width:80px;" step="0.1"/><span class="unit">% PRECIO NETO</span></div>
+            <div class="pstate"><span class="tag ok">Activo</span></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3>Bono por tier Celsius Rewards</h3>
+          <div class="policy-row" style="grid-template-columns: 1fr 1fr 100px;">
+            <div class="pname"><strong>Bellota</strong><span class="pdesc">0 – 999 pts</span></div>
+            <div class="pcontrol"><input type="number" value="0" style="width:80px;" step="0.1"/><span class="unit">% ADICIONAL</span></div>
+            <div class="pstate"><span class="tag off">Sin bono</span></div>
+          </div>
+          <div class="policy-row" style="grid-template-columns: 1fr 1fr 100px;">
+            <div class="pname"><strong>Roble Joven</strong><span class="pdesc">1,000 – 2,999 pts</span></div>
+            <div class="pcontrol"><input type="number" value="0.5" style="width:80px;" step="0.1"/><span class="unit">% ADICIONAL</span></div>
+            <div class="pstate"><span class="tag ok">Activo</span></div>
+          </div>
+          <div class="policy-row" style="grid-template-columns: 1fr 1fr 100px;">
+            <div class="pname"><strong>Roble</strong><span class="pdesc">3,000 – 7,999 pts</span></div>
+            <div class="pcontrol"><input type="number" value="1.5" style="width:80px;" step="0.1"/><span class="unit">% ADICIONAL</span></div>
+            <div class="pstate"><span class="tag ok">Activo</span></div>
+          </div>
+          <div class="policy-row" style="grid-template-columns: 1fr 1fr 100px;">
+            <div class="pname"><strong>Roble Maestro</strong><span class="pdesc">8,000+ pts</span></div>
+            <div class="pcontrol"><input type="number" value="3.0" style="width:80px;" step="0.1"/><span class="unit">% ADICIONAL</span></div>
+            <div class="pstate"><span class="tag ok">Activo</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card mb-24">
+        <h3>Bonos por proyecto · pre-venta</h3>
+        <div class="policy-row" style="grid-template-columns: 1fr 1fr 100px;">
+          <div class="pname"><strong>Solar · niveles 9–14 (premium)</strong><span class="pdesc">Vigente hasta 30-jun-2026.</span></div>
+          <div class="pcontrol"><input type="number" value="5" style="width:80px;" step="0.5"/><span class="unit">% EXTRA</span></div>
+          <div class="pstate"><span class="tag ok">Activo</span></div>
+        </div>
+        <div class="policy-row" style="grid-template-columns: 1fr 1fr 100px;">
+          <div class="pname"><strong>Cima · early bird (primeras 20)</strong><span class="pdesc">Quedan 12 unidades.</span></div>
+          <div class="pcontrol"><input type="number" value="4" style="width:80px;" step="0.5"/><span class="unit">% EXTRA</span></div>
+          <div class="pstate"><span class="tag ok">Activo</span></div>
+        </div>
+      </div>
+
+      <div class="card mb-24">
+        <h3>Reglas de pago</h3>
+        <div class="policy-row">
+          <div class="pname"><strong>Cuándo se acredita la comisión</strong><span class="pdesc">Momento en que el broker la recibe.</span></div>
+          <div class="pcontrol">
+            <select style="width:200px;">
+              <option>Al firmar promesa</option>
+              <option selected>Al escriturar (cierre)</option>
+              <option>50% al apartar + 50% al cerrar</option>
+            </select>
+          </div>
+          <div class="pstate"><span class="tag ok">Activo</span></div>
+        </div>
+        <div class="policy-row">
+          <div class="pname"><strong>Régimen fiscal del broker</strong><span class="pdesc">Para emisión de CFDI.</span></div>
+          <div class="pcontrol">
+            <select style="width:200px;">
+              <option selected>Honorarios (Persona física)</option>
+              <option>Régimen de incorporación</option>
+              <option>Persona moral</option>
+            </select>
+          </div>
+          <div class="pstate"><span class="tag ok">Configurado por broker</span></div>
+        </div>
+        <div class="policy-row">
+          <div class="pname"><strong>Día de pago de comisiones</strong><span class="pdesc">Día del mes en que se ejecutan los pagos.</span></div>
+          <div class="pcontrol">
+            <input type="number" value="15" style="width:80px;"/>
+            <span class="unit">DÍA DEL MES</span>
+          </div>
+          <div class="pstate"><span class="tag ok">Activo</span></div>
+        </div>
+      </div>
+
+      <!-- Simulador -->
+      <div class="card dark">
+        <h3 style="color:var(--ink);">Simulador de comisión</h3>
+        <div class="grid grid-3 mt-16" style="gap:16px;">
+          <div class="form-field"><label style="color:var(--sage);">Precio venta MXN</label><input type="number" value="8167400" style="background:var(--graphite); color:var(--ink); border-color:var(--graphite); padding:10px;"/></div>
+          <div class="form-field"><label style="color:var(--sage);">Tipo broker</label><select style="background:var(--graphite); color:var(--ink); border-color:var(--graphite); padding:10px;"><option>Interno</option><option>Externo convenio</option></select></div>
+          <div class="form-field"><label style="color:var(--sage);">Tier Rewards</label><select style="background:var(--graphite); color:var(--ink); border-color:var(--graphite); padding:10px;"><option>Bellota</option><option selected>Roble Joven</option><option>Roble</option><option>Roble Maestro</option></select></div>
+        </div>
+        <div class="mt-24" style="border-top:1px solid var(--graphite); padding-top:16px;">
+          <div class="flex-between text-small"><span style="color:var(--sage);">Comisión base 3.0%</span><span>MXN 245,022</span></div>
+          <div class="flex-between text-small mt-8"><span style="color:var(--sage);">Bono Roble Joven +0.5%</span><span>MXN 40,837</span></div>
+          <div class="flex-between text-small mt-8"><span style="color:var(--sage);">Bono Solar premium +5%</span><span>MXN 408,370</span></div>
+          <div class="flex-between mt-16" style="font-size:24px; border-top:1px solid var(--graphite); padding-top:12px;"><span style="color:var(--sage); font-size:13px;">COMISIÓN TOTAL</span><span>MXN 694,229</span></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ REWARDS CONFIG ============ -->
+    <section id="rewards-cfg" class="view">
+      <div class="view-header">
+        <div class="section-mark"><span class="label">§09 · Celsius Rewards · configuración del programa</span><span class="rule"></span></div>
+        <h1>Rewards · configuración</h1>
+        <p class="lede">Define los tiers, los puntos por hito y el catálogo de canje. Cualquier cambio afecta acumulaciones <em class="serif-italic">futuras</em>; las pasadas se mantienen.</p>
+      </div>
+
+      <div class="card mb-24">
+        <h3>Tiers del programa</h3>
+        <div class="tier-config label-row" style="grid-template-columns: 60px 1fr 100px 100px 100px;">
+          <div>Tier</div><div>Nombre</div><div style="text-align:right;">Min pts</div><div style="text-align:right;">Bono comisión</div><div style="text-align:right;">Invitaciones</div>
+        </div>
+        <div class="tier-config">
+          <div class="ttag">T1</div>
+          <div><input value="Bellota" style="width:100%;"/></div>
+          <div><input type="number" value="0"/></div>
+          <div><input type="number" value="0" step="0.5"/></div>
+          <div><input type="number" value="0"/></div>
+        </div>
+        <div class="tier-config">
+          <div class="ttag">T2</div>
+          <div><input value="Roble Joven" style="width:100%;"/></div>
+          <div><input type="number" value="1000"/></div>
+          <div><input type="number" value="0.5" step="0.5"/></div>
+          <div><input type="number" value="1"/></div>
+        </div>
+        <div class="tier-config">
+          <div class="ttag">T3</div>
+          <div><input value="Roble" style="width:100%;"/></div>
+          <div><input type="number" value="3000"/></div>
+          <div><input type="number" value="1.5" step="0.5"/></div>
+          <div><input type="number" value="3"/></div>
+        </div>
+        <div class="tier-config">
+          <div class="ttag">T4</div>
+          <div><input value="Roble Maestro" style="width:100%;"/></div>
+          <div><input type="number" value="8000"/></div>
+          <div><input type="number" value="3.0" step="0.5"/></div>
+          <div><input type="number" value="∞" style="text-align:right;"/></div>
+        </div>
+      </div>
+
+      <div class="card mb-24">
+        <h3>Puntos por hito</h3>
+        <table>
+          <thead><tr><th>Hito</th><th style="text-align:right;">Puntos</th><th>Tope</th><th>Multiplicador</th><th></th></tr></thead>
+          <tbody>
+            <tr><td>Cotización enviada</td><td class="num"><input type="number" value="10" style="width:60px; text-align:right; padding:6px;"/></td><td><input value="5 / cliente" style="width:120px; padding:6px;"/></td><td><span class="mono">—</span></td><td><button class="btn small ghost">Editar</button></td></tr>
+            <tr><td>Apartado 24h confirmado</td><td class="num"><input type="number" value="50" style="width:60px; text-align:right; padding:6px;"/></td><td><input value="sin tope" style="width:120px; padding:6px;"/></td><td><span class="mono">—</span></td><td><button class="btn small ghost">Editar</button></td></tr>
+            <tr><td>Promesa firmada</td><td class="num"><input type="number" value="150" style="width:60px; text-align:right; padding:6px;"/></td><td><input value="sin tope" style="width:120px; padding:6px;"/></td><td><span class="mono">—</span></td><td><button class="btn small ghost">Editar</button></td></tr>
+            <tr><td>Venta cerrada</td><td class="num"><input type="number" value="500" style="width:60px; text-align:right; padding:6px;"/></td><td><input value="sin tope" style="width:120px; padding:6px;"/></td><td><span class="mono">+1 / MXN 10K</span></td><td><button class="btn small ghost">Editar</button></td></tr>
+            <tr><td>Cliente referido que cotiza</td><td class="num"><input type="number" value="100" style="width:60px; text-align:right; padding:6px;"/></td><td><input value="sin tope" style="width:120px; padding:6px;"/></td><td><span class="mono">—</span></td><td><button class="btn small ghost">Editar</button></td></tr>
+            <tr><td>Capacitación completada</td><td class="num"><input type="number" value="30" style="width:60px; text-align:right; padding:6px;"/></td><td><input value="por curso" style="width:120px; padding:6px;"/></td><td><span class="mono">—</span></td><td><button class="btn small ghost">Editar</button></td></tr>
+            <tr><td>Reseña 5★</td><td class="num"><input type="number" value="75" style="width:60px; text-align:right; padding:6px;"/></td><td><input value="por venta" style="width:120px; padding:6px;"/></td><td><span class="mono">—</span></td><td><button class="btn small ghost">Editar</button></td></tr>
+          </tbody>
+        </table>
+        <button class="btn small ghost mt-16">+ Añadir hito</button>
+      </div>
+
+      <div class="card mb-24">
+        <h3>Multiplicadores temporales (campañas Rewards)</h3>
+        <div class="policy-row">
+          <div class="pname"><strong>Doble puntos · junio 2026</strong><span class="pdesc">Aplica a cotizaciones emitidas entre 1-jun y 30-jun.</span></div>
+          <div class="pcontrol"><span class="mono">2×</span><span class="unit" style="margin-left:12px;">EN COTIZACIÓN</span></div>
+          <div class="pstate"><span class="tag ok">Programado</span></div>
+        </div>
+        <div class="policy-row">
+          <div class="pname"><strong>3× cierres · cierre de trimestre</strong><span class="pdesc">Última semana de Q2.</span></div>
+          <div class="pcontrol"><span class="mono">3×</span><span class="unit" style="margin-left:12px;">EN VENTA</span></div>
+          <div class="pstate"><span class="tag ok">Programado</span></div>
+        </div>
+        <button class="btn small ghost mt-16">+ Nueva campaña Rewards</button>
+      </div>
+
+      <div class="card">
+        <div class="flex-between mb-16">
+          <h3>Catálogo de canje</h3>
+          <button class="btn primary small">+ Nuevo premio</button>
+        </div>
+        <table>
+          <thead><tr><th>Premio</th><th>Categoría</th><th style="text-align:right;">Costo · pts</th><th>Tier mínimo</th><th>Stock</th><th>Status</th><th></th></tr></thead>
+          <tbody>
+            <tr><td>+1% comisión siguiente cierre</td><td>Bono</td><td class="num">800</td><td>Bellota</td><td class="text-muted">∞</td><td><span class="tag ok">Activo</span></td><td><button class="btn small ghost">Editar</button></td></tr>
+            <tr><td>Curso ventas premium · CEDIM</td><td>Capacitación</td><td class="num">1,200</td><td>Bellota</td><td class="num">12</td><td><span class="tag ok">Activo</span></td><td><button class="btn small ghost">Editar</button></td></tr>
+            <tr><td>Cena anual Celsius · 2 boletos</td><td>Evento</td><td class="num">2,500</td><td>Roble Joven</td><td class="num">8</td><td><span class="tag ok">Activo</span></td><td><button class="btn small ghost">Editar</button></td></tr>
+            <tr><td>iPad Air</td><td>Equipo</td><td class="num">4,800</td><td>Roble</td><td class="num">3</td><td><span class="tag ok">Activo</span></td><td><button class="btn small ghost">Editar</button></td></tr>
+            <tr><td>Fin de semana San Miguel · 2 personas</td><td>Experiencia</td><td class="num">5,500</td><td>Roble</td><td class="num">2</td><td><span class="tag ok">Activo</span></td><td><button class="btn small ghost">Editar</button></td></tr>
+            <tr><td>Amazon MXN 5,000</td><td>Gift card</td><td class="num">2,000</td><td>Bellota</td><td class="text-muted">∞</td><td><span class="tag ok">Activo</span></td><td><button class="btn small ghost">Editar</button></td></tr>
+            <tr><td>1:1 Director Comercial</td><td>Mentoría</td><td class="num">1,500</td><td>Bellota</td><td class="num">4</td><td><span class="tag ok">Activo</span></td><td><button class="btn small ghost">Editar</button></td></tr>
+            <tr><td>Tour exclusivo proyecto en obra</td><td>Experiencia</td><td class="num">600</td><td>Bellota</td><td class="text-muted">∞</td><td><span class="tag ok">Activo</span></td><td><button class="btn small ghost">Editar</button></td></tr>
+            <tr><td>Viaje grupal · Madrid arquitectura</td><td>Experiencia</td><td class="num">12,000</td><td>Roble Maestro</td><td class="num">2</td><td><span class="tag warn">Borrador</span></td><td><button class="btn small ghost">Editar</button></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ============ CAMPAIGNS ============ -->
+    <section id="campaigns" class="view">
+      <div class="view-header">
+        <div class="section-mark"><span class="label">§10 · Campañas · pop-ups, banners y emails</span><span class="rule"></span></div>
+        <h1>Campañas</h1>
+        <p class="lede">Mismas herramientas que ven los brokers, controladas centralmente. Crear y programar pop-ups dirigidos por audiencia, ver métricas consolidadas de engagement.</p>
+      </div>
+
+      <div class="grid grid-4 mb-24">
+        <div class="card"><div class="label">Activas</div><div class="value">5</div></div>
+        <div class="card"><div class="label">Programadas</div><div class="value">8</div></div>
+        <div class="card"><div class="label">Impresiones · 30d</div><div class="value" style="font-size:22px;">12,840</div></div>
+        <div class="card"><div class="label">CTR promedio</div><div class="value">18%</div></div>
+      </div>
+
+      <div class="card">
+        <div class="flex-between mb-16">
+          <h3>Todas las campañas</h3>
+          <button class="btn primary small">+ Nueva campaña</button>
+        </div>
+        <table>
+          <thead><tr><th>Campaña</th><th>Audiencia</th><th>Formato</th><th>Inicio</th><th>Fin</th><th>Impresiones</th><th>CTR</th><th>Estado</th></tr></thead>
+          <tbody>
+            <tr><td>Bono 5% Solar premium</td><td>Brokers</td><td>Pop-up login</td><td>2026-05-15</td><td>2026-06-30</td><td class="num">2,840</td><td class="num">24%</td><td><span class="tag ok">Activa</span></td></tr>
+            <tr><td>Atrio open house · 6 jun</td><td>Clientes</td><td>Email + Pop-up</td><td>2026-05-22</td><td>2026-06-06</td><td class="num">1,420</td><td class="num">18%</td><td><span class="tag ok">Activa</span></td></tr>
+            <tr><td>Cima early bird 7%</td><td>Ambos</td><td>Banner sticky</td><td>2026-05-10</td><td>2026-07-31</td><td class="num">5,210</td><td class="num">31%</td><td><span class="tag ok">Activa</span></td></tr>
+            <tr><td>Capacitación cierre avanzada</td><td>Brokers</td><td>Pop-up inline</td><td>2026-05-28</td><td>2026-06-12</td><td class="num">180</td><td class="num">42%</td><td><span class="tag ok">Activa</span></td></tr>
+            <tr><td>Doble puntos Rewards</td><td>Brokers</td><td>Pop-up login</td><td>2026-06-01</td><td>2026-06-30</td><td class="num">3,190</td><td class="num">38%</td><td><span class="tag ok">Activa</span></td></tr>
+            <tr><td>Verano Solar 3%</td><td>Clientes</td><td>Pop-up inline</td><td>2026-06-15</td><td>2026-06-30</td><td class="num text-muted">—</td><td class="num text-muted">—</td><td><span class="tag warn">Programada</span></td></tr>
+            <tr><td>Aniversario Celsius VIP</td><td>Top 10</td><td>Email directo</td><td>2026-04-15</td><td>2026-04-20</td><td class="num text-muted">12</td><td class="num text-muted">90%</td><td><span class="tag off">Cerrada</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ============ HUBSPOT ============ -->
+    <section id="hubspot" class="view">
+      <div class="view-header">
+        <div class="section-mark"><span class="label">§12 · HubSpot · mapping de campos y pipeline</span><span class="rule"></span></div>
+        <h1>HubSpot mapping</h1>
+        <p class="lede">Configura cómo se mapean los campos entre la plataforma y HubSpot, qué objetos sincronizan, y el estado del pipeline "<em class="serif-italic">Cotizaciones Celsius</em>".</p>
+      </div>
+
+      <div class="grid grid-asym mb-24">
+        <div class="card">
+          <h3>Conexión</h3>
+          <div class="health-row"><span><span class="status-dot up"></span>HubSpot · Account 23847211</span><span class="tag ok">Conectado</span></div>
+          <div class="health-row"><span><span class="status-dot up"></span>OAuth token</span><span class="mono" style="font-size:10px;">VÁLIDO · EXPIRA 89D</span></div>
+          <div class="health-row"><span><span class="status-dot up"></span>Webhooks endpoint</span><span class="mono" style="font-size:10px;">/api/hubspot/webhook</span></div>
+          <div class="health-row"><span><span class="status-dot up"></span>Última sync exitosa</span><span class="mono" style="font-size:10px;">HACE 2 MIN</span></div>
+          <div class="mt-16" style="display:flex; gap:8px;">
+            <button class="btn small ghost">Re-autenticar</button>
+            <button class="btn small ghost">Probar webhook</button>
+            <button class="btn small danger">Desconectar</button>
+          </div>
+        </div>
+        <div class="card">
+          <h3>Métricas de sync · 24h</h3>
+          <div class="health-row text-small"><span>Eventos enviados</span><span class="num">412</span></div>
+          <div class="health-row text-small"><span>Webhooks recibidos</span><span class="num">186</span></div>
+          <div class="health-row text-small"><span>Errores</span><span class="num">3</span></div>
+          <div class="health-row text-small"><span>Reintentados con éxito</span><span class="num">2</span></div>
+          <div class="health-row text-small"><span>Pendientes manuales</span><span class="num" style="color:var(--oxide);">1</span></div>
+        </div>
+      </div>
+
+      <div class="card mb-24">
+        <h3>Pipeline "Cotizaciones Celsius"</h3>
+        <table>
+          <thead><tr><th>#</th><th>Etapa HubSpot</th><th>Status interno</th><th>Auto-acción</th><th></th></tr></thead>
+          <tbody>
+            <tr><td class="mono">01</td><td>Cotización borrador</td><td>QUOTE.draft</td><td>—</td><td><button class="btn small ghost">Editar</button></td></tr>
+            <tr><td class="mono">02</td><td>Cotización enviada</td><td>QUOTE.sent</td><td>Email PDF al cliente</td><td><button class="btn small ghost">Editar</button></td></tr>
+            <tr><td class="mono">03</td><td>Apartado 24h</td><td>UNIT_HOLD.active</td><td>Crear Task firma</td><td><button class="btn small ghost">Editar</button></td></tr>
+            <tr><td class="mono">04</td><td>Reservada (con pago)</td><td>UNIT_HOLD.reserved</td><td>Cerrar Task firma</td><td><button class="btn small ghost">Editar</button></td></tr>
+            <tr><td class="mono">05</td><td>Promesa firmada</td><td>QUOTE.promised</td><td>Crear Task escrituración</td><td><button class="btn small ghost">Editar</button></td></tr>
+            <tr><td class="mono">06</td><td>Ganada</td><td>UNIT.sold</td><td>Acreditar comisión</td><td><button class="btn small ghost">Editar</button></td></tr>
+            <tr><td class="mono">X1</td><td>Lost · expirado</td><td>UNIT_HOLD.released</td><td>Liberar unidad</td><td><button class="btn small ghost">Editar</button></td></tr>
+            <tr><td class="mono">X2</td><td>Lost · desistió</td><td>QUOTE.cancelled</td><td>Liberar unidad</td><td><button class="btn small ghost">Editar</button></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="card">
+        <h3>Mapping de campos</h3>
+        <div class="mapping-row" style="background:var(--stone); padding:10px 12px; margin: 0 -12px 8px; border:none;">
+          <div class="mono" style="font-size:9px;">Campo plataforma</div>
+          <div></div>
+          <div class="mono" style="font-size:9px;">Campo HubSpot</div>
+          <div class="mono" style="font-size:9px; text-align:right;">Sync</div>
+        </div>
+        <div class="mapping-row"><div><code>client.full_name</code></div><div class="arrow">↔</div><div><code>contact.firstname + lastname</code></div><div style="text-align:right;"><span class="tag ok">Bidireccional</span></div></div>
+        <div class="mapping-row"><div><code>client.email</code></div><div class="arrow">↔</div><div><code>contact.email</code></div><div style="text-align:right;"><span class="tag ok">Bidireccional</span></div></div>
+        <div class="mapping-row"><div><code>client.phone</code></div><div class="arrow">↔</div><div><code>contact.phone</code></div><div style="text-align:right;"><span class="tag ok">Bidireccional</span></div></div>
+        <div class="mapping-row"><div><code>client.rfc</code></div><div class="arrow">→</div><div><code>contact.rfc_mx</code> (custom)</div><div style="text-align:right;"><span class="tag warn">Solo salida</span></div></div>
+        <div class="mapping-row"><div><code>quote.net_price</code></div><div class="arrow">→</div><div><code>deal.amount</code></div><div style="text-align:right;"><span class="tag warn">Solo salida</span></div></div>
+        <div class="mapping-row"><div><code>quote.unit_id</code></div><div class="arrow">→</div><div><code>deal.unit_id_celsius</code> (custom)</div><div style="text-align:right;"><span class="tag warn">Solo salida</span></div></div>
+        <div class="mapping-row"><div><code>hold.expires_at</code></div><div class="arrow">→</div><div><code>deal.hold_expires_at_celsius</code></div><div style="text-align:right;"><span class="tag warn">Solo salida</span></div></div>
+        <div class="mapping-row"><div><code>broker.email</code></div><div class="arrow">→</div><div><code>deal.hubspot_owner_id</code></div><div style="text-align:right;"><span class="tag warn">Solo salida</span></div></div>
+        <div class="mapping-row"><div><code>quote.payment_schema</code></div><div class="arrow">→</div><div><code>deal.payment_schema_json</code></div><div style="text-align:right;"><span class="tag warn">Solo salida</span></div></div>
+        <button class="btn small ghost mt-16">+ Nuevo mapping</button>
+      </div>
+    </section>
+
+    <!-- ============ PROJECT CONFIG ============ -->
+    <section id="project-cfg" class="view">
+      <div class="view-header">
+        <div class="section-mark"><span class="label">§07 · Configuración por proyecto · overrides locales</span><span class="rule"></span></div>
+        <h1>Configuración por proyecto</h1>
+        <p class="lede">Cada proyecto puede <em class="serif-italic">sobrescribir las políticas globales</em>. Útil cuando un proyecto necesita reglas distintas: otro % de bono, otro esquema de pago default, sus propias salas, su propia campaña activa. Los valores no sobrescritos heredan del global automáticamente.</p>
+      </div>
+
+      <div class="subtabs">
+        <button class="active">Solar · Polanco</button>
+        <button>Atrio · Condesa</button>
+        <button>Cima · Coyoacán</button>
+        <button>+ Nuevo proyecto</button>
+      </div>
+
+      <!-- Identidad del proyecto -->
+      <div class="card mb-24">
+        <h3>Identidad &amp; ficha técnica</h3>
+        <div class="grid grid-2 mt-16" style="gap:16px;">
+          <div class="form-field"><label>Nombre comercial</label><input value="Solar" style="padding:8px 12px; border:1px solid var(--hairline-strong);"/></div>
+          <div class="form-field"><label>Código interno</label><input value="SOL-2026" style="padding:8px 12px; border:1px solid var(--hairline-strong);"/></div>
+          <div class="form-field"><label>Dirección</label><input value="Av. Horacio 1830, Polanco" style="padding:8px 12px; border:1px solid var(--hairline-strong);"/></div>
+          <div class="form-field"><label>Fecha de entrega</label><input type="month" value="2027-12" style="padding:8px 12px; border:1px solid var(--hairline-strong);"/></div>
+          <div class="form-field"><label>Status comercial</label>
+            <select style="padding:8px 12px; border:1px solid var(--hairline-strong);"><option>Pre-venta</option><option selected>Venta activa</option><option>Casi sold-out</option><option>Sold out</option></select>
+          </div>
+          <div class="form-field"><label>SVG del edificio</label>
+            <div style="display:flex; gap:8px; align-items:center;">
+              <span class="mono" style="font-size:11px;">solar-tower-v3.svg</span>
+              <button class="btn small ghost">Reemplazar</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Overrides de políticas -->
+      <div class="card mb-24">
+        <div class="flex-between mb-16">
+          <h3>Políticas específicas de Solar</h3>
+          <span class="mono" style="font-size:10px;">4 OVERRIDES ACTIVOS</span>
+        </div>
+
+        <div class="policy-row">
+          <div class="pname">
+            <strong>Bono de pre-venta</strong>
+            <span class="pdesc">Override del global (3%). Vigente hasta 30-jun-2026.</span>
+          </div>
+          <div class="pcontrol">
+            <input type="number" value="3" style="width:80px;" step="0.5"/>
+            <span class="unit">%</span>
+          </div>
+          <div class="pstate"><span class="tag ok">Override</span></div>
+        </div>
+
+        <div class="policy-row">
+          <div class="pname">
+            <strong>Bono niveles 9–14 (premium)</strong>
+            <span class="pdesc">Bono adicional para empujar la venta de los pisos altos.</span>
+          </div>
+          <div class="pcontrol">
+            <input type="number" value="5" style="width:80px;" step="0.5"/>
+            <span class="unit">% PARA BROKER</span>
+          </div>
+          <div class="pstate"><span class="tag ok">Override</span></div>
+        </div>
+
+        <div class="policy-row">
+          <div class="pname">
+            <strong>Enganche mínimo</strong>
+            <span class="pdesc">Hereda del global. Click para personalizar.</span>
+          </div>
+          <div class="pcontrol">
+            <input type="number" value="20" style="width:80px;"/>
+            <span class="unit">% (HEREDADO)</span>
+          </div>
+          <div class="pstate"><span class="tag off">Heredado</span></div>
+        </div>
+
+        <div class="policy-row">
+          <div class="pname">
+            <strong>Esquema de pago default</strong>
+            <span class="pdesc">Cuál se preselecciona al cotizar este proyecto.</span>
+          </div>
+          <div class="pcontrol">
+            <select style="width:240px; padding:8px 12px; border:1px solid var(--hairline-strong);">
+              <option>Pagos directos a obra · 18 meses</option>
+              <option>Pagos directos a obra · 24 meses</option>
+              <option>Contado · descuento 2%</option>
+            </select>
+          </div>
+          <div class="pstate"><span class="tag ok">Override</span></div>
+        </div>
+
+        <div class="policy-row">
+          <div class="pname">
+            <strong>Duración del apartado</strong>
+            <span class="pdesc">Solar usa duración estándar.</span>
+          </div>
+          <div class="pcontrol">
+            <input type="number" value="24" style="width:80px;"/>
+            <span class="unit">HRS (HEREDADO)</span>
+          </div>
+          <div class="pstate"><span class="tag off">Heredado</span></div>
+        </div>
+
+        <div class="policy-row">
+          <div class="pname">
+            <strong>Bono compra directa cliente</strong>
+            <span class="pdesc">% adicional cuando el cliente compra sin broker (self-service).</span>
+          </div>
+          <div class="pcontrol">
+            <input type="number" value="1" style="width:80px;" step="0.5"/>
+            <span class="unit">%</span>
+          </div>
+          <div class="pstate"><span class="tag ok">Override</span></div>
+        </div>
+
+        <div class="policy-row">
+          <div class="pname">
+            <strong>Asesor hipotecario asignado</strong>
+            <span class="pdesc">Quien atiende preguntas de financiamiento de este proyecto.</span>
+          </div>
+          <div class="pcontrol">
+            <select style="width:240px; padding:8px 12px; border:1px solid var(--hairline-strong);">
+              <option>Eduardo Cano · BBVA · ecano@bbva.mx</option>
+              <option>Mariana Ruiz · Santander</option>
+              <option>Jorge Espinosa · Scotiabank</option>
+            </select>
+          </div>
+          <div class="pstate"><span class="tag ok">Override</span></div>
+        </div>
+      </div>
+
+      <!-- Política de pago de comisión por proyecto -->
+      <div class="card mb-24">
+        <div class="flex-between mb-16">
+          <h3>Política de pago de comisión · Solar</h3>
+          <span class="mono" style="font-size:10px;">CONTROLA EL DEVENGO Y EL CALENDARIO DE PAGO A BROKERS</span>
+        </div>
+
+        <div class="policy-row">
+          <div class="pname">
+            <strong>Hito que detona el devengo</strong>
+            <span class="pdesc">Cuándo la comisión deja de "acumular" y se vuelve pasivo de Celsius (cuenta por pagar al broker).</span>
+          </div>
+          <div class="pcontrol">
+            <select style="width:240px; padding:8px 12px; border:1px solid var(--hairline-strong);">
+              <option>Pago de enganche por el cliente</option>
+              <option selected>Firma de promesa de compraventa</option>
+              <option>Pago de escrituración</option>
+              <option>Entrega física de la unidad</option>
+              <option>Pago de la primera mensualidad de obra</option>
+            </select>
+          </div>
+          <div class="pstate"><span class="tag ok">Override</span></div>
+        </div>
+
+        <div class="policy-row">
+          <div class="pname">
+            <strong>Días hábiles después del hito para pagar</strong>
+            <span class="pdesc">Tiempo de gracia entre el devengo y el día en que el broker recibe el depósito.</span>
+          </div>
+          <div class="pcontrol">
+            <input type="number" value="30" style="width:80px;"/>
+            <span class="unit">DÍAS HÁBILES</span>
+          </div>
+          <div class="pstate"><span class="tag ok">Override</span></div>
+        </div>
+
+        <div class="policy-row">
+          <div class="pname">
+            <strong>Calendario de payment run</strong>
+            <span class="pdesc">Días del mes en que se ejecutan los pagos. Si el día de pago calculado cae en un día sin run, se mueve al siguiente.</span>
+          </div>
+          <div class="pcontrol">
+            <select style="width:240px; padding:8px 12px; border:1px solid var(--hairline-strong);">
+              <option>Semanal · lunes</option>
+              <option selected>Quincenal · 15 y 30 de cada mes</option>
+              <option>Mensual · día 15</option>
+              <option>Mensual · día 30</option>
+            </select>
+          </div>
+          <div class="pstate"><span class="tag ok">Override</span></div>
+        </div>
+
+        <div class="policy-row">
+          <div class="pname">
+            <strong>% que se libera al hito</strong>
+            <span class="pdesc">Permite split del pago. Ej: 50% al hito principal y 50% al hito secundario.</span>
+          </div>
+          <div class="pcontrol">
+            <input type="number" value="100" style="width:80px;"/>
+            <span class="unit">% AL HITO PRINCIPAL</span>
+          </div>
+          <div class="pstate"><span class="tag off">Heredado</span></div>
+        </div>
+
+        <div class="policy-row">
+          <div class="pname">
+            <strong>Retención si el cliente cancela</strong>
+            <span class="pdesc">Si la operación se cae dentro de los 90 días post-firma, la comisión se revierte.</span>
+          </div>
+          <div class="pcontrol">
+            <div class="toggle on"></div>
+            <span class="unit">SÍ · 90 DÍAS</span>
+          </div>
+          <div class="pstate"><span class="tag ok">Activo</span></div>
+        </div>
+
+        <div class="policy-row">
+          <div class="pname">
+            <strong>Cap mensual de comisiones por proyecto</strong>
+            <span class="pdesc">Tope opcional al monto total pagado en comisiones por mes por este proyecto.</span>
+          </div>
+          <div class="pcontrol">
+            <input type="text" value="Sin tope" style="width:120px;"/>
+          </div>
+          <div class="pstate"><span class="tag off">Sin límite</span></div>
+        </div>
+
+        <!-- Vista previa del flujo -->
+        <div class="card" style="background:var(--deep-forest); color:var(--ink); padding:16px; margin-top:16px;">
+          <div class="mono mb-8" style="color:var(--sage);">§ VISTA PREVIA DEL FLUJO CON ESTA POLÍTICA</div>
+          <div style="display:grid; grid-template-columns: 1fr 24px 1fr 24px 1fr 24px 1fr; gap:8px; align-items:center; font-size:11px;">
+            <div style="background:var(--stone); padding:10px; text-align:center;">
+              <div class="mono" style="font-size:9px; color:var(--graphite);">DÍA 0</div>
+              <div style="margin-top:4px; color:var(--ink);">Cliente firma promesa</div>
+            </div>
+            <div style="text-align:center; color:var(--sage); font-family:'JetBrains Mono';">→</div>
+            <div style="background:var(--moss); color:var(--ink); padding:10px; text-align:center;">
+              <div class="mono" style="font-size:9px;">DÍA 0</div>
+              <div style="margin-top:4px;"><strong>Comisión devenga</strong></div>
+            </div>
+            <div style="text-align:center; color:var(--sage); font-family:'JetBrains Mono';">→</div>
+            <div style="background:var(--stone); padding:10px; text-align:center;">
+              <div class="mono" style="font-size:9px; color:var(--graphite);">DÍA 30 HÁBIL</div>
+              <div style="margin-top:4px; color:var(--ink);">Fecha objetivo de pago</div>
+            </div>
+            <div style="text-align:center; color:var(--sage); font-family:'JetBrains Mono';">→</div>
+            <div style="background:var(--oxide); color:var(--ink); padding:10px; text-align:center;">
+              <div class="mono" style="font-size:9px;">DÍA 30</div>
+              <div style="margin-top:4px;"><strong>Payment run 15/30</strong></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Reglas comerciales del proyecto -->
+      <div class="card mb-24">
+        <h3>Reglas comerciales · Solar</h3>
+        <div class="policy-row">
+          <div class="pname">
+            <strong>Brokers autorizados a comercializar</strong>
+            <span class="pdesc">Define qué brokers/inmobiliarias pueden cotizar este proyecto.</span>
+          </div>
+          <div class="pcontrol" style="flex-direction:column; align-items:flex-start;">
+            <div style="display:flex; gap:8px; flex-wrap:wrap;">
+              <label class="mono" style="font-size:10px; padding:4px 8px; background:var(--moss); color:var(--ink);"><input type="checkbox" checked style="margin-right:6px;"/>Celsius interno</label>
+              <label class="mono" style="font-size:10px; padding:4px 8px; background:var(--moss); color:var(--ink);"><input type="checkbox" checked style="margin-right:6px;"/>Sotheby's</label>
+              <label class="mono" style="font-size:10px; padding:4px 8px; background:var(--moss); color:var(--ink);"><input type="checkbox" checked style="margin-right:6px;"/>Coldwell Banker</label>
+              <label class="mono" style="font-size:10px; padding:4px 8px; background:var(--stone);"><input type="checkbox" style="margin-right:6px;"/>RE/MAX</label>
+              <label class="mono" style="font-size:10px; padding:4px 8px; background:var(--stone);"><input type="checkbox" style="margin-right:6px;"/>Century 21</label>
+            </div>
+          </div>
+          <div class="pstate"><span class="tag ok">3 activas</span></div>
+        </div>
+
+        <div class="policy-row">
+          <div class="pname">
+            <strong>Disponible en self-service público</strong>
+            <span class="pdesc">¿Los clientes pueden cotizar y comprar este proyecto sin broker?</span>
+          </div>
+          <div class="pcontrol">
+            <div class="toggle on"></div>
+            <span class="unit">SÍ</span>
+          </div>
+          <div class="pstate"><span class="tag ok">Override</span></div>
+        </div>
+
+        <div class="policy-row">
+          <div class="pname">
+            <strong>Aceptar reservas online sin visita</strong>
+            <span class="pdesc">Si no, el cliente debe agendar visita antes de pagar enganche.</span>
+          </div>
+          <div class="pcontrol">
+            <div class="toggle on"></div>
+            <span class="unit">SÍ</span>
+          </div>
+          <div class="pstate"><span class="tag ok">Override</span></div>
+        </div>
+
+        <div class="policy-row">
+          <div class="pname">
+            <strong>Permite Celsius Rewards</strong>
+            <span class="pdesc">Las cotizaciones de este proyecto acumulan puntos.</span>
+          </div>
+          <div class="pcontrol">
+            <div class="toggle on"></div>
+            <span class="unit">SÍ</span>
+          </div>
+          <div class="pstate"><span class="tag off">Heredado</span></div>
+        </div>
+      </div>
+
+      <!-- Salas del proyecto -->
+      <div class="card mb-24">
+        <h3>Showroom &amp; salas del proyecto</h3>
+        <table>
+          <thead><tr><th>Sala</th><th>Capacidad</th><th>Equipamiento</th><th>Reservable por brokers</th><th></th></tr></thead>
+          <tbody>
+            <tr><td><strong>Sala Bosque</strong></td><td class="num">6</td><td>Proyector + TV + WiFi</td><td><div class="toggle on"></div></td><td><button class="btn small ghost">Editar</button></td></tr>
+            <tr><td><strong>Sala Roble</strong></td><td class="num">4</td><td>Pizarrón + WiFi</td><td><div class="toggle on"></div></td><td><button class="btn small ghost">Editar</button></td></tr>
+            <tr><td><strong>Departamento muestra</strong></td><td class="num">8</td><td>Decorado + acceso planta</td><td><div class="toggle on"></div></td><td><button class="btn small ghost">Editar</button></td></tr>
+          </tbody>
+        </table>
+        <button class="btn small ghost mt-16">+ Añadir sala</button>
+      </div>
+
+      <!-- Acciones -->
+      <div class="flex" style="gap:8px; justify-content:flex-end;">
+        <button class="btn ghost">Resetear todos los overrides</button>
+        <button class="btn ghost">Descartar cambios</button>
+        <button class="btn primary">Guardar configuración de Solar</button>
+      </div>
+      <div class="mono mt-16" style="font-size:10px; text-align:right;">Los cambios aplican a Solar únicamente. Atrio y Cima conservan su propia configuración.</div>
+    </section>
+
+    <!-- ============ ROOMS / GUARDIAS CONFIG ============ -->
+    <section id="rooms-cfg" class="view">
+      <div class="view-header">
+        <div class="section-mark"><span class="label">§11 · Salas &amp; guardias · gestión central</span><span class="rule"></span></div>
+        <h1>Salas &amp; guardias</h1>
+        <p class="lede">Vista consolidada de todas las reservas de sala y guardias activas. Reglas globales del sistema de reserva, sanciones por no-show, y configuración de turnos.</p>
+      </div>
+
+      <div class="grid grid-4 mb-24">
+        <div class="card"><div class="label">Reservas próximas 7d</div><div class="value">48</div><div class="delta">12 hoy</div></div>
+        <div class="card"><div class="label">Ocupación salas · mes</div><div class="value">72%</div><div class="delta">+12 pp</div></div>
+        <div class="card"><div class="label">Guardias cubiertas</div><div class="value">94%</div><div class="delta">2 turnos sin tomar</div></div>
+        <div class="card"><div class="label">No-shows · mes</div><div class="value" style="color:var(--oxide);">3</div><div class="delta" style="color:var(--oxide);">2 sancionados</div></div>
+      </div>
+
+      <div class="subtabs">
+        <button class="active">Reservas activas</button>
+        <button>Calendario guardias</button>
+        <button>Reglas globales</button>
+        <button>No-shows</button>
+      </div>
+
+      <div class="card mb-24">
+        <div class="flex-between mb-16">
+          <h3>Reservas activas · próximas 24h</h3>
+          <button class="btn small ghost">Exportar</button>
+        </div>
+        <table>
+          <thead><tr><th>Showroom · sala</th><th>Broker</th><th>Cliente</th><th>Motivo</th><th>Inicio</th><th>Personas</th><th>Status</th></tr></thead>
+          <tbody>
+            <tr><td>Solar · Bosque</td><td>R. Valenzuela</td><td>M. Rodríguez</td><td>Firma promesa</td><td class="mono" style="font-size:10px;">HOY · 16:00</td><td class="num">2</td><td><span class="tag ok">Confirmada</span></td></tr>
+            <tr><td>Atrio · Roble</td><td>A. Ortega</td><td>R. Galindo</td><td>Cita hipotecaria</td><td class="mono" style="font-size:10px;">HOY · 18:00</td><td class="num">3</td><td><span class="tag ok">Confirmada</span></td></tr>
+            <tr><td>Cima · Muestra</td><td>P. Castañeda</td><td>F. Méndez</td><td>Recorrido</td><td class="mono" style="font-size:10px;">MAÑ · 10:30</td><td class="num">4</td><td><span class="tag ok">Confirmada</span></td></tr>
+            <tr><td>Solar · Muestra</td><td>R. Valenzuela</td><td>L. Pereda</td><td>Recorrido + cotización</td><td class="mono" style="font-size:10px;">MAÑ · 11:00</td><td class="num">2</td><td><span class="tag ok">Confirmada</span></td></tr>
+            <tr><td>Atrio · Bosque</td><td>D. Iturbide</td><td>J. Tagle</td><td>Presentación</td><td class="mono" style="font-size:10px;">MAÑ · 13:00</td><td class="num">3</td><td><span class="tag warn">Sin confirmar 24h</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="card mb-24">
+        <h3>Reglas globales</h3>
+        <div class="policy-row">
+          <div class="pname"><strong>Slot de reserva</strong><span class="pdesc">Granularidad mínima de reservación.</span></div>
+          <div class="pcontrol"><select style="width:140px; padding:8px 12px; border:1px solid var(--hairline-strong);"><option selected>30 minutos</option><option>1 hora</option><option>15 minutos</option></select></div>
+          <div class="pstate"><span class="tag ok">Activo</span></div>
+        </div>
+        <div class="policy-row">
+          <div class="pname"><strong>Máx. reservas activas por broker</strong><span class="pdesc">Evita que un broker bloquee la disponibilidad.</span></div>
+          <div class="pcontrol"><input type="number" value="3" style="width:80px;"/><span class="unit">RESERVAS</span></div>
+          <div class="pstate"><span class="tag ok">Activo</span></div>
+        </div>
+        <div class="policy-row">
+          <div class="pname"><strong>Plazo mínimo para cancelar</strong><span class="pdesc">Tiempo antes del inicio para cancelar sin penalización.</span></div>
+          <div class="pcontrol"><input type="number" value="4" style="width:80px;"/><span class="unit">HORAS</span></div>
+          <div class="pstate"><span class="tag ok">Activo</span></div>
+        </div>
+        <div class="policy-row">
+          <div class="pname"><strong>Penalización por no-show</strong><span class="pdesc">Puntos Rewards descontados si no se presenta.</span></div>
+          <div class="pcontrol"><input type="number" value="50" style="width:80px;"/><span class="unit">PTS DESCUENTO</span></div>
+          <div class="pstate"><span class="tag ok">Activo</span></div>
+        </div>
+        <div class="policy-row">
+          <div class="pname"><strong>No-shows antes de suspender broker</strong><span class="pdesc">A partir del N° no-show se suspende automáticamente 30 días.</span></div>
+          <div class="pcontrol"><input type="number" value="3" style="width:80px;"/><span class="unit">NO-SHOWS / TRIM</span></div>
+          <div class="pstate"><span class="tag ok">Activo</span></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>Configuración de guardias</h3>
+        <div class="policy-row">
+          <div class="pname"><strong>Turnos por día por showroom</strong><span class="pdesc">Cómo se dividen las horas de operación.</span></div>
+          <div class="pcontrol"><select style="width:200px; padding:8px 12px; border:1px solid var(--hairline-strong);"><option>1 turno · 09:00–19:00</option><option selected>2 turnos · 09–14 / 14–19</option><option>3 turnos · 09/13/17</option></select></div>
+          <div class="pstate"><span class="tag ok">Activo</span></div>
+        </div>
+        <div class="policy-row">
+          <div class="pname"><strong>Mínimo de guardias por mes</strong><span class="pdesc">Para mantener status activo.</span></div>
+          <div class="pcontrol"><input type="number" value="1" style="width:80px;"/><span class="unit">GUARDIA / MES</span></div>
+          <div class="pstate"><span class="tag ok">Activo</span></div>
+        </div>
+        <div class="policy-row">
+          <div class="pname"><strong>Puntos Rewards por guardia atendida</strong><span class="pdesc">Bono base por cubrir el turno.</span></div>
+          <div class="pcontrol"><input type="number" value="30" style="width:80px;"/><span class="unit">PUNTOS</span></div>
+          <div class="pstate"><span class="tag ok">Activo</span></div>
+        </div>
+        <div class="policy-row">
+          <div class="pname"><strong>Puntos por walk-in atendido</strong><span class="pdesc">Adicional por cada cliente que llega y se atiende.</span></div>
+          <div class="pcontrol"><input type="number" value="10" style="width:80px;"/><span class="unit">PUNTOS</span></div>
+          <div class="pstate"><span class="tag ok">Activo</span></div>
+        </div>
+        <div class="policy-row">
+          <div class="pname"><strong>Días de exclusividad sobre walk-in</strong><span class="pdesc">Si el walk-in cierra en este plazo, la comisión es del broker de guardia.</span></div>
+          <div class="pcontrol"><input type="number" value="60" style="width:80px;"/><span class="unit">DÍAS</span></div>
+          <div class="pstate"><span class="tag ok">Activo</span></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ COMMISSIONS · PASIVOS & PAGOS ============ -->
+    <section id="commissions-pay" class="view">
+      <div class="view-header">
+        <div class="section-mark"><span class="label">§13 · Comisiones · pasivos &amp; pagos · vista financiera</span><span class="rule"></span></div>
+        <h1>Comisiones · pasivos &amp; pagos</h1>
+        <p class="lede">El sistema de control financiero del devengo y pago a brokers. Cada cierre que cumple su hito gatillo entra al <em class="serif-italic">pasivo</em>, va contando días según la política del proyecto, y se programa al siguiente payment run. Vista de todo lo que Celsius debe a quién, desde cuándo, y cuándo se paga.</p>
+      </div>
+
+      <!-- KPI cards -->
+      <div class="grid grid-4 mb-24">
+        <div class="card"><div class="label">Pasivo total vigente</div><div class="value" style="font-size:24px;">MXN 4.82M</div><div class="delta neg">+12% vs mes ant.</div></div>
+        <div class="card"><div class="label">A pagar próx. 30 días</div><div class="value" style="font-size:24px;">MXN 1.87M</div><div class="delta">19 comisiones</div></div>
+        <div class="card"><div class="label">Pagado YTD</div><div class="value" style="font-size:24px;">MXN 12.4M</div><div class="delta">142 transacciones</div></div>
+        <div class="card"><div class="label">Brokers con saldo</div><div class="value">21</div><div class="delta">de 24 activos</div></div>
+      </div>
+
+      <!-- Aging del pasivo -->
+      <div class="grid grid-asym mb-24">
+        <div class="card">
+          <h3>Aging del pasivo · antigüedad desde el devengo</h3>
+          <div style="display:grid; grid-template-columns: repeat(4, 1fr); gap:0; margin-top:16px;">
+            <div style="padding:18px; background:var(--moss); color:var(--ink);">
+              <div class="mono" style="font-size:9px;">0–15 DÍAS</div>
+              <div style="font-size:22px; margin-top:6px;">MXN 2.18M</div>
+              <div class="mono" style="font-size:10px; margin-top:4px; opacity:0.8;">9 comisiones · en ventana</div>
+            </div>
+            <div style="padding:18px; background:var(--sage); color:var(--ink);">
+              <div class="mono" style="font-size:9px;">15–30 DÍAS</div>
+              <div style="font-size:22px; margin-top:6px;">MXN 1.42M</div>
+              <div class="mono" style="font-size:10px; margin-top:4px; opacity:0.8;">7 comisiones · en ventana</div>
+            </div>
+            <div style="padding:18px; background:var(--oxide); color:var(--ink);">
+              <div class="mono" style="font-size:9px;">30–45 DÍAS</div>
+              <div style="font-size:22px; margin-top:6px;">MXN 980K</div>
+              <div class="mono" style="font-size:10px; margin-top:4px; opacity:0.8;">3 comisiones · próximas a vencer</div>
+            </div>
+            <div style="padding:18px; background:#E63946; color:var(--ink);">
+              <div class="mono" style="font-size:9px;">45+ DÍAS · VENCIDO</div>
+              <div style="font-size:22px; margin-top:6px;">MXN 240K</div>
+              <div class="mono" style="font-size:10px; margin-top:4px; opacity:0.8;">2 comisiones · revisar</div>
+            </div>
+          </div>
+          <div class="mono mt-16" style="font-size:10px;">Aging neutral: lo normal es estar en 0–30d según política. 30+ implica que ya pasó el día objetivo de pago.</div>
+        </div>
+
+        <div class="card" style="background:var(--deep-forest); color:var(--ink);">
+          <div class="mono" style="color:var(--sage);">PRÓXIMO PAYMENT RUN</div>
+          <div style="font-size:36px; font-weight:400; letter-spacing:-0.01em; margin:12px 0 4px;">Vie 30 may</div>
+          <div style="font-size:14px; color:var(--sage); font-style:italic; font-family:'Source Serif 4', Georgia, serif;">en 2 días</div>
+          <div style="margin-top:20px; padding-top:16px; border-top:1px solid var(--stone);">
+            <div style="display:flex; justify-content:space-between; padding:4px 0; font-size:13px;"><span style="color:var(--sage);">Comisiones incluidas</span><span>14</span></div>
+            <div style="display:flex; justify-content:space-between; padding:4px 0; font-size:13px;"><span style="color:var(--sage);">Brokers únicos</span><span>9</span></div>
+            <div style="display:flex; justify-content:space-between; padding:4px 0; font-size:13px;"><span style="color:var(--sage);">Monto bruto</span><span>MXN 1,287,420</span></div>
+            <div style="display:flex; justify-content:space-between; padding:4px 0; font-size:13px;"><span style="color:var(--sage);">Retenciones ISR</span><span>−MXN 128,742</span></div>
+            <div style="display:flex; justify-content:space-between; padding:10px 0 4px; border-top:1px solid var(--stone); margin-top:8px; font-weight:500;"><span style="color:var(--ink);">Monto a transferir</span><span>MXN 1,158,678</span></div>
+          </div>
+          <div style="display:flex; gap:8px; margin-top:20px;">
+            <button class="btn small primary" style="background:var(--moss); color:var(--ink); border-color:var(--moss);">Aprobar y procesar →</button>
+            <button class="btn small ghost" style="border-color:var(--stone); color:var(--sage);">Vista previa SPEI</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tabs -->
+      <div class="subtabs">
+        <button class="active">Pasivos vigentes · 21</button>
+        <button>Próximo payment run · 14</button>
+        <button>Programados futuros · 27</button>
+        <button>Pagos completados · 142</button>
+        <button>Disputas · 1</button>
+      </div>
+
+      <!-- Pasivos vigentes -->
+      <div class="card mb-24">
+        <div class="flex-between mb-16">
+          <h3>Pasivos vigentes · todos los brokers</h3>
+          <div style="display:flex; gap:8px;">
+            <button class="btn ghost small">Filtrar por proyecto</button>
+            <button class="btn ghost small">Filtrar por broker</button>
+            <button class="btn ghost small">Exportar CSV</button>
+          </div>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>Folio</th>
+              <th>Broker</th>
+              <th>Cliente · unidad</th>
+              <th>Proyecto</th>
+              <th>Monto MXN</th>
+              <th>Hito gatillo</th>
+              <th>Cumplido</th>
+              <th>Aging</th>
+              <th>Pago objetivo</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="mono" style="font-size:10px;">COM-2026-0119</td>
+              <td>D. Iturbide</td>
+              <td>J. Camacho · Cima 0508</td>
+              <td>Cima</td>
+              <td class="num">448,000</td>
+              <td>Escrituración</td>
+              <td class="mono" style="font-size:10px;">18 MAY (10D)</td>
+              <td><span style="display:inline-block; padding:2px 6px; background:var(--moss); color:var(--ink); font-family:'JetBrains Mono'; font-size:10px;">10D</span></td>
+              <td><strong>2 JUN</strong></td>
+              <td><span class="tag" style="background:var(--oxide); color:var(--ink);">Programado · próx run</span></td>
+            </tr>
+            <tr>
+              <td class="mono" style="font-size:10px;">COM-2026-0142</td>
+              <td>R. Valenzuela</td>
+              <td>C. Vázquez · Solar 0301</td>
+              <td>Solar</td>
+              <td class="num">245,022</td>
+              <td>Firma promesa</td>
+              <td class="mono" style="font-size:10px;">15 MAY (13D)</td>
+              <td><span style="display:inline-block; padding:2px 6px; background:var(--moss); color:var(--ink); font-family:'JetBrains Mono'; font-size:10px;">13D</span></td>
+              <td><strong>15 JUN</strong></td>
+              <td><span class="tag" style="background:var(--moss); color:var(--ink);">Devengado · en ventana</span></td>
+            </tr>
+            <tr>
+              <td class="mono" style="font-size:10px;">COM-2026-0138</td>
+              <td>R. Valenzuela</td>
+              <td>R. Galindo · Atrio A-302</td>
+              <td>Atrio</td>
+              <td class="num">185,500</td>
+              <td>Pago enganche</td>
+              <td class="mono" style="font-size:10px;">27 MAY (1D)</td>
+              <td><span style="display:inline-block; padding:2px 6px; background:var(--moss); color:var(--ink); font-family:'JetBrains Mono'; font-size:10px;">1D</span></td>
+              <td><strong>11 JUL</strong></td>
+              <td><span class="tag" style="background:var(--moss); color:var(--ink);">Devengado · en ventana</span></td>
+            </tr>
+            <tr>
+              <td class="mono" style="font-size:10px;">COM-2026-0131</td>
+              <td>A. Ortega</td>
+              <td>P. Morales · Solar 1208</td>
+              <td>Solar</td>
+              <td class="num">312,800</td>
+              <td>Firma promesa</td>
+              <td class="mono" style="font-size:10px;">02 MAY (26D)</td>
+              <td><span style="display:inline-block; padding:2px 6px; background:var(--sage); color:var(--ink); font-family:'JetBrains Mono'; font-size:10px;">26D</span></td>
+              <td><strong>1 JUN</strong></td>
+              <td><span class="tag" style="background:var(--oxide); color:var(--ink);">Programado · próx run</span></td>
+            </tr>
+            <tr>
+              <td class="mono" style="font-size:10px;">COM-2026-0129</td>
+              <td>A. Ortega</td>
+              <td>S. Aguilar · Cima 0312</td>
+              <td>Cima</td>
+              <td class="num">198,400</td>
+              <td>Escrituración</td>
+              <td class="mono" style="font-size:10px;">21 MAY (7D)</td>
+              <td><span style="display:inline-block; padding:2px 6px; background:var(--moss); color:var(--ink); font-family:'JetBrains Mono'; font-size:10px;">7D</span></td>
+              <td><strong>5 JUN</strong></td>
+              <td><span class="tag" style="background:var(--oxide); color:var(--ink);">Programado · próx run</span></td>
+            </tr>
+            <tr>
+              <td class="mono" style="font-size:10px;">COM-2026-0124</td>
+              <td>P. Castañeda</td>
+              <td>L. Mendoza · Solar 0408</td>
+              <td>Solar</td>
+              <td class="num">218,900</td>
+              <td>Firma promesa</td>
+              <td class="mono" style="font-size:10px;">04 ABR (54D)</td>
+              <td><span style="display:inline-block; padding:2px 6px; background:#E63946; color:var(--ink); font-family:'JetBrains Mono'; font-size:10px;">54D · VENC</span></td>
+              <td><strong>4 MAY (vencido)</strong></td>
+              <td><span class="tag" style="background:#E63946; color:var(--ink);">Vencido · revisar</span></td>
+            </tr>
+            <tr>
+              <td class="mono" style="font-size:10px;">COM-2026-0118</td>
+              <td>M. Solís</td>
+              <td>R. Briseño · Atrio B-104</td>
+              <td>Atrio</td>
+              <td class="num">156,200</td>
+              <td>Pago enganche</td>
+              <td class="mono" style="font-size:10px;">15 MAY (13D)</td>
+              <td><span style="display:inline-block; padding:2px 6px; background:var(--moss); color:var(--ink); font-family:'JetBrains Mono'; font-size:10px;">13D</span></td>
+              <td><strong>29 JUN</strong></td>
+              <td><span class="tag" style="background:var(--moss); color:var(--ink);">Devengado · en ventana</span></td>
+            </tr>
+            <tr>
+              <td class="mono" style="font-size:10px;">COM-2026-0117</td>
+              <td>P. Castañeda</td>
+              <td>F. Robledo · Cima 0205</td>
+              <td>Cima</td>
+              <td class="num">142,800</td>
+              <td>Escrituración</td>
+              <td class="mono" style="font-size:10px;">22 MAY (6D)</td>
+              <td><span style="display:inline-block; padding:2px 6px; background:var(--moss); color:var(--ink); font-family:'JetBrains Mono'; font-size:10px;">6D</span></td>
+              <td><strong>6 JUN</strong></td>
+              <td><span class="tag" style="background:var(--oxide); color:var(--ink);">Programado · próx run</span></td>
+            </tr>
+            <tr>
+              <td class="mono" style="font-size:10px;">COM-2026-0112</td>
+              <td>S. Mendoza</td>
+              <td>J. Hidalgo · Atrio A-209</td>
+              <td>Atrio</td>
+              <td class="num">128,400</td>
+              <td>Pago enganche</td>
+              <td class="mono" style="font-size:10px;">01 MAY (27D)</td>
+              <td><span style="display:inline-block; padding:2px 6px; background:var(--sage); color:var(--ink); font-family:'JetBrains Mono'; font-size:10px;">27D</span></td>
+              <td><strong>15 JUN</strong></td>
+              <td><span class="tag" style="background:var(--moss); color:var(--ink);">Devengado · en ventana</span></td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="mono mt-16" style="font-size:10px;">Mostrando 9 de 21 pasivos vigentes · suman MXN 2.04M de un total de MXN 4.82M</div>
+      </div>
+
+      <!-- Pasivo por broker -->
+      <div class="grid grid-asym mb-24">
+        <div class="card">
+          <h3>Pasivo por broker · top 10</h3>
+          <table style="margin-top:12px;">
+            <thead><tr><th>Broker</th><th>Comisiones vigentes</th><th>Total adeudado MXN</th><th>Pago más viejo</th></tr></thead>
+            <tbody>
+              <tr><td><strong>R. Valenzuela</strong><div class="mono" style="font-size:9px;">interno · Roble Joven</div></td><td class="num">4</td><td class="num">694,022</td><td class="mono" style="font-size:10px;">15 MAY · 13D</td></tr>
+              <tr><td><strong>A. Ortega</strong><div class="mono" style="font-size:9px;">interno · Roble</div></td><td class="num">3</td><td class="num">628,400</td><td class="mono" style="font-size:10px;">02 MAY · 26D</td></tr>
+              <tr><td><strong>D. Iturbide</strong><div class="mono" style="font-size:9px;">interno · Roble Joven</div></td><td class="num">2</td><td class="num">582,200</td><td class="mono" style="font-size:10px;">18 MAY · 10D</td></tr>
+              <tr><td><strong>P. Castañeda</strong><div class="mono" style="font-size:9px;">Sotheby's · Roble Joven</div></td><td class="num">3</td><td class="num">521,300</td><td class="mono" style="font-size:10px; color:#E63946;">04 ABR · 54D</td></tr>
+              <tr><td><strong>M. Solís</strong><div class="mono" style="font-size:9px;">Coldwell · Roble Joven</div></td><td class="num">2</td><td class="num">340,400</td><td class="mono" style="font-size:10px;">15 MAY · 13D</td></tr>
+              <tr><td><strong>S. Mendoza</strong><div class="mono" style="font-size:9px;">RE/MAX · Bellota</div></td><td class="num">2</td><td class="num">288,400</td><td class="mono" style="font-size:10px;">01 MAY · 27D</td></tr>
+              <tr><td><strong>J. Almeida</strong><div class="mono" style="font-size:9px;">interno · Bellota</div></td><td class="num">2</td><td class="num">242,800</td><td class="mono" style="font-size:10px;">20 MAY · 8D</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div>
+          <div class="card">
+            <div class="mono mb-16">§ Políticas activas · resumen</div>
+            <div style="display:flex; flex-direction:column; gap:14px; font-size:13px;">
+              <div style="padding-bottom:12px; border-bottom:1px solid var(--hairline);">
+                <div style="font-weight:500;">Solar · Polanco</div>
+                <div class="text-muted" style="font-size:12px;">Hito: firma promesa · pago: +30d hábil</div>
+                <div class="mono" style="font-size:10px; margin-top:4px; color:var(--sage);">RUN QUINCENAL · 15 Y 30</div>
+              </div>
+              <div style="padding-bottom:12px; border-bottom:1px solid var(--hairline);">
+                <div style="font-weight:500;">Atrio · Condesa</div>
+                <div class="text-muted" style="font-size:12px;">Hito: pago enganche · pago: +45d hábil</div>
+                <div class="mono" style="font-size:10px; margin-top:4px; color:var(--sage);">RUN QUINCENAL · 15 Y 30</div>
+              </div>
+              <div>
+                <div style="font-weight:500;">Cima · Coyoacán</div>
+                <div class="text-muted" style="font-size:12px;">Hito: escrituración · pago: +15d hábil</div>
+                <div class="mono" style="font-size:10px; margin-top:4px; color:var(--sage);">RUN SEMANAL · LUNES</div>
+              </div>
+            </div>
+            <button class="btn ghost small mt-16" style="width:100%;" onclick="show('project-cfg')">Editar políticas →</button>
+          </div>
+
+          <div class="card mt-24">
+            <div class="mono mb-16">§ Próximas acciones del sistema</div>
+            <div style="display:flex; flex-direction:column; gap:10px; font-size:12px;">
+              <div style="display:flex; gap:8px;"><span class="mono" style="font-size:10px; min-width:60px; color:var(--sage);">EN 2D</span><div>Payment run del 30 may · 14 comisiones</div></div>
+              <div style="display:flex; gap:8px;"><span class="mono" style="font-size:10px; min-width:60px; color:var(--sage);">EN 5D</span><div>Run extra Cima (semanal) · 3 comisiones</div></div>
+              <div style="display:flex; gap:8px;"><span class="mono" style="font-size:10px; min-width:60px; color:var(--sage);">EN 18D</span><div>Payment run del 15 jun · estimado 19 comisiones</div></div>
+              <div style="display:flex; gap:8px;"><span class="mono" style="font-size:10px; min-width:60px; color:var(--oxide);">VENCIDO</span><div>1 comisión vencida 54d · Castañeda · escalar a admin</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Movimientos contables -->
+      <div class="card">
+        <h3>Movimientos contables del periodo · mayo 2026</h3>
+        <table style="margin-top:12px;">
+          <thead><tr><th>Fecha</th><th>Tipo</th><th>Folio</th><th>Concepto</th><th>Cargo MXN</th><th>Abono MXN</th><th>Saldo MXN</th></tr></thead>
+          <tbody>
+            <tr><td class="mono" style="font-size:10px;">28 MAY</td><td><span class="tag" style="background:var(--moss); color:var(--ink);">DEVENGO</span></td><td class="mono" style="font-size:10px;">COM-0142</td><td>Comisión devengada · Vázquez · Solar 0301</td><td></td><td class="num">245,022</td><td class="num">4,820,140</td></tr>
+            <tr><td class="mono" style="font-size:10px;">27 MAY</td><td><span class="tag" style="background:var(--moss); color:var(--ink);">DEVENGO</span></td><td class="mono" style="font-size:10px;">COM-0138</td><td>Comisión devengada · Galindo · Atrio A-302</td><td></td><td class="num">185,500</td><td class="num">4,575,118</td></tr>
+            <tr><td class="mono" style="font-size:10px;">15 MAY</td><td><span class="tag" style="background:var(--sage); color:var(--ink);">PAGO</span></td><td class="mono" style="font-size:10px;">PR-2026-15</td><td>Payment run · 12 comisiones · 8 brokers</td><td class="num">1,142,800</td><td></td><td class="num">4,389,618</td></tr>
+            <tr><td class="mono" style="font-size:10px;">10 MAY</td><td><span class="tag" style="background:var(--moss); color:var(--ink);">DEVENGO</span></td><td class="mono" style="font-size:10px;">COM-0131</td><td>Comisión devengada · Morales · Solar 1208</td><td></td><td class="num">312,800</td><td class="num">5,532,418</td></tr>
+            <tr><td class="mono" style="font-size:10px;">08 MAY</td><td><span class="tag" style="background:#E63946; color:var(--ink);">REVERSO</span></td><td class="mono" style="font-size:10px;">COM-0104</td><td>Cliente canceló dentro de 90d · reversar comisión</td><td class="num">186,400</td><td></td><td class="num">5,219,618</td></tr>
+            <tr><td class="mono" style="font-size:10px;">02 MAY</td><td><span class="tag" style="background:var(--moss); color:var(--ink);">DEVENGO</span></td><td class="mono" style="font-size:10px;">COM-0124</td><td>Comisión devengada · Mendoza · Solar 0408</td><td></td><td class="num">218,900</td><td class="num">5,406,018</td></tr>
+            <tr><td class="mono" style="font-size:10px;">30 ABR</td><td><span class="tag" style="background:var(--sage); color:var(--ink);">PAGO</span></td><td class="mono" style="font-size:10px;">PR-2026-14</td><td>Payment run · 11 comisiones · 7 brokers</td><td class="num">984,200</td><td></td><td class="num">5,187,118</td></tr>
+          </tbody>
+        </table>
+        <div class="mono mt-16" style="font-size:10px;">Cada movimiento se replica al ledger general · sync OK con Quickbooks · última sincronización: hace 4 min</div>
+      </div>
+    </section>
+
+    <!-- ============ BROKER APPLICATIONS ============ -->
+    <section id="applications" class="view">
+      <div class="view-header">
+        <div class="section-mark"><span class="label">§14 · Solicitudes de broker · queue de revisión</span><span class="rule"></span></div>
+        <h1>Solicitudes de broker</h1>
+        <p class="lede">Aspirantes que aplicaron desde el portal público. Revisa <em class="serif-italic">documentos</em>, verifica referencias, y aprueba o rechaza. Las aprobadas se convierten automáticamente en cuentas activas con onboarding.</p>
+      </div>
+
+      <div class="grid grid-4 mb-24">
+        <div class="card"><div class="label">Solicitudes abiertas</div><div class="value">12</div><div class="delta">8 nuevas esta semana</div></div>
+        <div class="card"><div class="label">Tiempo medio de revisión</div><div class="value">1.8</div><div class="delta">días hábiles</div></div>
+        <div class="card"><div class="label">Tasa de aprobación · Q2</div><div class="value">62%</div><div class="delta">28 aprob · 17 rechaz</div></div>
+        <div class="card"><div class="label">SLA de respuesta · 3d</div><div class="value">94%</div><div class="delta">cumplimiento</div></div>
+      </div>
+
+      <div class="subtabs">
+        <button class="active">Pendientes · 12</button>
+        <button>En revisión · 4</button>
+        <button>Documentos faltantes · 3</button>
+        <button>Aprobadas · 28</button>
+        <button>Rechazadas · 17</button>
+      </div>
+
+      <div class="card mb-24">
+        <table>
+          <thead><tr><th>Folio</th><th>Aplicante</th><th>Inmobiliaria</th><th>Experiencia</th><th>Docs</th><th>Recibida</th><th>SLA</th><th></th></tr></thead>
+          <tbody>
+            <tr><td class="mono" style="font-size:10px;">APP-2026-00184</td><td><strong>María Pérez</strong><div class="mono" style="font-size:9px;">maria.perez@gmail.com</div></td><td>Independiente</td><td>3–5 años</td><td><span class="tag ok">5/5</span></td><td class="mono" style="font-size:10px;">HOY · 10:42</td><td class="num">3d</td><td><button class="btn small primary">Revisar →</button></td></tr>
+            <tr><td class="mono" style="font-size:10px;">APP-2026-00183</td><td><strong>Carlos Mendoza</strong><div class="mono" style="font-size:9px;">cmendoza@sothebys.mx</div></td><td>Sotheby's</td><td>10+ años</td><td><span class="tag ok">6/5</span></td><td class="mono" style="font-size:10px;">AYER · 16:18</td><td class="num">2d</td><td><button class="btn small primary">Revisar →</button></td></tr>
+            <tr><td class="mono" style="font-size:10px;">APP-2026-00182</td><td><strong>Sofía Hernández</strong><div class="mono" style="font-size:9px;">sofia@remax.mx</div></td><td>RE/MAX</td><td>5–10 años</td><td><span class="tag warn">4/5 falta INE</span></td><td class="mono" style="font-size:10px;">AYER · 11:04</td><td class="num">2d</td><td><button class="btn small ghost">Pedir docs</button></td></tr>
+            <tr><td class="mono" style="font-size:10px;">APP-2026-00181</td><td><strong>Luis Arellano</strong><div class="mono" style="font-size:9px;">luis.arellano@gmail.com</div></td><td>Independiente</td><td>0–2 años</td><td><span class="tag ok">5/5</span></td><td class="mono" style="font-size:10px;">27 MAY</td><td class="num">1d</td><td><button class="btn small primary">Revisar →</button></td></tr>
+            <tr><td class="mono" style="font-size:10px;">APP-2026-00180</td><td><strong>Diana Torres</strong><div class="mono" style="font-size:9px;">dtorres@coldwell.mx</div></td><td>Coldwell Banker</td><td>5–10 años</td><td><span class="tag ok">5/5</span></td><td class="mono" style="font-size:10px;">26 MAY</td><td class="num" style="color:var(--oxide);">0d · hoy</td><td><button class="btn small primary">Revisar →</button></td></tr>
+            <tr><td class="mono" style="font-size:10px;">APP-2026-00179</td><td><strong>Fernando Cárdenas</strong><div class="mono" style="font-size:9px;">fer.cardenas@gmail.com</div></td><td>Independiente</td><td>3–5 años</td><td><span class="tag warn">3/5 incompleto</span></td><td class="mono" style="font-size:10px;">26 MAY</td><td class="num">0d</td><td><button class="btn small ghost">Pedir docs</button></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Detalle de aplicación -->
+      <div class="card">
+        <div class="flex-between mb-16">
+          <div>
+            <div class="mono mb-8">APP-2026-00184 · NUEVA</div>
+            <h3 style="font-size:22px;">María Pérez</h3>
+            <div class="text-small text-muted">Independiente · 3–5 años de experiencia · CDMX zona poniente</div>
+          </div>
+          <div style="display:flex; gap:8px;">
+            <button class="btn ghost small">Pedir más info</button>
+            <button class="btn danger small">Rechazar</button>
+            <button class="btn primary small">Aprobar y crear cuenta</button>
+          </div>
+        </div>
+
+        <div class="grid grid-2" style="gap:24px;">
+          <div>
+            <h3 style="font-size:14px;">Documentos subidos</h3>
+            <div style="margin-top:8px;">
+              <div class="flex-between" style="padding:10px 0; border-bottom:1px solid var(--hairline); font-size:13px;">
+                <div><strong>INE vigente</strong><div class="mono" style="font-size:9px;">ine_maria_perez.pdf · 1.8 MB</div></div>
+                <div style="display:flex; gap:6px;"><span class="tag ok">OK</span><button class="btn small ghost">Ver</button></div>
+              </div>
+              <div class="flex-between" style="padding:10px 0; border-bottom:1px solid var(--hairline); font-size:13px;">
+                <div><strong>Constancia situación fiscal</strong><div class="mono" style="font-size:9px;">csf_perma85.pdf · 320 KB</div></div>
+                <div style="display:flex; gap:6px;"><span class="tag ok">OK</span><button class="btn small ghost">Ver</button></div>
+              </div>
+              <div class="flex-between" style="padding:10px 0; border-bottom:1px solid var(--hairline); font-size:13px;">
+                <div><strong>Comprobante de domicilio</strong><div class="mono" style="font-size:9px;">cfe_mayo26.pdf · 410 KB</div></div>
+                <div style="display:flex; gap:6px;"><span class="tag ok">OK</span><button class="btn small ghost">Ver</button></div>
+              </div>
+              <div class="flex-between" style="padding:10px 0; border-bottom:1px solid var(--hairline); font-size:13px;">
+                <div><strong>Cédula profesional</strong><div class="mono" style="font-size:9px;">cedula_ampi.pdf · 280 KB</div></div>
+                <div style="display:flex; gap:6px;"><span class="tag ok">OK</span><button class="btn small ghost">Ver</button></div>
+              </div>
+              <div class="flex-between" style="padding:10px 0; font-size:13px;">
+                <div><strong>Carátula bancaria</strong><div class="mono" style="font-size:9px;">bbva_card.pdf · 156 KB</div></div>
+                <div style="display:flex; gap:6px;"><span class="tag ok">OK</span><button class="btn small ghost">Ver</button></div>
+              </div>
+            </div>
+
+            <h3 class="mt-24" style="font-size:14px;">Validaciones automáticas</h3>
+            <div class="health-row text-small"><span><span class="status-dot up"></span>RFC válido en SAT</span><span class="mono" style="font-size:10px;">PERMA850123ABC</span></div>
+            <div class="health-row text-small"><span><span class="status-dot up"></span>CURP coincide</span><span class="mono" style="font-size:10px;">VERIFICADA</span></div>
+            <div class="health-row text-small"><span><span class="status-dot up"></span>Cédula activa en RENIA</span><span class="mono" style="font-size:10px;">CDMX-2018</span></div>
+            <div class="health-row text-small"><span><span class="status-dot warn"></span>No aparece en buró de crédito empresarial</span><span class="mono" style="font-size:10px;">NEUTRO</span></div>
+            <div class="health-row text-small"><span><span class="status-dot up"></span>LinkedIn perfil consistente</span><span class="mono" style="font-size:10px;">/maria-perez-rb</span></div>
+          </div>
+
+          <div>
+            <h3 style="font-size:14px;">Datos profesionales</h3>
+            <table style="font-size:12px;">
+              <tbody>
+                <tr><td class="mono" style="width:40%;">Email</td><td>maria.perez@gmail.com</td></tr>
+                <tr><td class="mono">Teléfono</td><td>+52 55 4422 1100</td></tr>
+                <tr><td class="mono">Ciudad</td><td>CDMX</td></tr>
+                <tr><td class="mono">Especialidad</td><td>Residencial nuevo</td></tr>
+                <tr><td class="mono">Inmobiliaria</td><td>Independiente</td></tr>
+                <tr><td class="mono">Convenios actuales</td><td>Vertical, BeGrand</td></tr>
+                <tr><td class="mono">LinkedIn</td><td><a>linkedin.com/in/maria-perez-rb</a></td></tr>
+              </tbody>
+            </table>
+
+            <h3 class="mt-24" style="font-size:14px;">Carta de presentación</h3>
+            <div class="card" style="background:var(--stone); border-color:var(--stone); font-size:13px; line-height:1.5; padding:16px;">
+              "Mi cartera de clientes está principalmente en CDMX zona poniente, busco proyectos institucionales con buen ticket promedio. He cerrado 8 ventas en los últimos 12 meses promediando MXN 9.4M cada una. Me interesa Solar particularmente por la ubicación y el target de cliente."
+            </div>
+
+            <h3 class="mt-24" style="font-size:14px;">Decisión sugerida del sistema</h3>
+            <div class="card dark" style="padding:16px;">
+              <div class="mono" style="color:var(--sage);">RECOMENDACIÓN AUTOMÁTICA</div>
+              <h3 style="color:var(--ink); margin-top:6px; font-size:16px;">Aprobar</h3>
+              <p class="text-small" style="color:var(--sage); margin-top:4px;">Documentación completa, validaciones OK, experiencia consistente con perfil objetivo de Celsius (residencial premium). Sugerencia: aprobar como <strong style="color:var(--ink);">broker externo independiente · comisión 2.5%</strong>.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="flex-between mt-24" style="padding-top:16px; border-top:1px solid var(--hairline);">
+          <div class="mono" style="font-size:10px;">RECIBIDA HOY 10:42 · SLA EXPIRA EN 3 DÍAS</div>
+          <div style="display:flex; gap:8px;">
+            <button class="btn ghost small">Asignar a otro admin</button>
+            <button class="btn danger small">Rechazar con motivo</button>
+            <button class="btn primary small">Aprobar →</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ AUDIT ============ -->
+    <section id="audit" class="view">
+      <div class="view-header">
+        <div class="section-mark"><span class="label">§15 · Audit log · todas las acciones mutadoras</span><span class="rule"></span></div>
+        <h1>Audit log</h1>
+        <p class="lede">Cada cambio a entidades sensibles queda registrado: qué actor, qué entidad, qué cambió y cuándo. <em class="serif-italic">Append-only</em>: nadie puede borrar el registro, ni siquiera los admins.</p>
+      </div>
+
+      <div class="flex-between mb-16">
+        <div class="subtabs" style="margin-bottom:0;">
+          <button class="active">Todos · 1,284</button>
+          <button>Política</button>
+          <button>Inventario</button>
+          <button>Cotización</button>
+          <button>Pago</button>
+          <button>Acceso</button>
+        </div>
+        <div style="display:flex; gap:8px;">
+          <input type="text" placeholder="Buscar..." style="padding:8px 12px; border:1px solid var(--hairline-strong); font-size:12px;"/>
+          <button class="btn small ghost">Exportar</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="audit-row" style="font-family:'JetBrains Mono'; font-size:9px; letter-spacing:0.08em; text-transform:uppercase; color:var(--graphite); border-bottom-color:var(--hairline-strong);">
+          <div>Timestamp</div><div>Acción</div><div>Detalle</div><div style="text-align:right;">Actor</div>
+        </div>
+        <div class="audit-row"><div class="ts">2026-05-28 14:52</div><div><span class="action update">UPDATE</span></div><div><strong>policy.payment.msi_max</strong> · 6 → 9</div><div style="text-align:right;">R. Valenzuela</div></div>
+        <div class="audit-row"><div class="ts">2026-05-28 14:47</div><div><span class="action create">CREATE</span></div><div><strong>payment</strong> ch_3PqXa2L · MXN 1,657,982 · M. Rodríguez</div><div style="text-align:right;">Sistema · Stripe webhook</div></div>
+        <div class="audit-row"><div class="ts">2026-05-28 14:47</div><div><span class="action update">UPDATE</span></div><div><strong>unit_hold</strong> 3392 · active → reserved · Solar 805</div><div style="text-align:right;">Sistema</div></div>
+        <div class="audit-row"><div class="ts">2026-05-28 14:32</div><div><span class="action create">CREATE</span></div><div><strong>quote</strong> Q-2614 · MXN 8,167,400 · Solar 805 → M. Rodríguez</div><div style="text-align:right;">R. Valenzuela</div></div>
+        <div class="audit-row"><div class="ts">2026-05-28 14:32</div><div><span class="action create">CREATE</span></div><div><strong>unit_hold</strong> 3392 · Solar 805 · expira 2026-05-29 14:32</div><div style="text-align:right;">R. Valenzuela</div></div>
+        <div class="audit-row"><div class="ts">2026-05-28 13:18</div><div><span class="action update">UPDATE</span></div><div><strong>policy.commission.tier_roble</strong> · 1.0% → 1.5%</div><div style="text-align:right;">R. Valenzuela</div></div>
+        <div class="audit-row"><div class="ts">2026-05-28 11:05</div><div><span class="action create">CREATE</span></div><div><strong>campaign</strong> "Doble puntos Rewards" · activa 1-jun a 30-jun</div><div style="text-align:right;">A. Ortega</div></div>
+        <div class="audit-row"><div class="ts">2026-05-28 10:22</div><div><span class="action update">UPDATE</span></div><div><strong>unit.list_price</strong> · Atrio B-407 · MXN 6,720,000 → MXN 6,840,000</div><div style="text-align:right;">R. Valenzuela</div></div>
+        <div class="audit-row"><div class="ts">2026-05-28 09:48</div><div><span class="action create">CREATE</span></div><div><strong>broker</strong> J. Almeida · interno · onboarding</div><div style="text-align:right;">R. Valenzuela</div></div>
+        <div class="audit-row"><div class="ts">2026-05-28 09:14</div><div><span class="action update">UPDATE</span></div><div><strong>reward_catalog.ipad</strong> · stock 4 → 3 · canjeado por D. Iturbide</div><div style="text-align:right;">Sistema</div></div>
+        <div class="audit-row"><div class="ts">2026-05-28 08:00</div><div><span class="action update">UPDATE</span></div><div><strong>unit_hold.cron</strong> · 3 holds expirados liberados</div><div style="text-align:right;">Sistema · cron</div></div>
+        <div class="audit-row"><div class="ts">2026-05-27 23:30</div><div><span class="action update">UPDATE</span></div><div><strong>system</strong> · backup nocturno completado · 2.4 GB</div><div style="text-align:right;">Sistema</div></div>
+      </div>
+    </section>
+
+    <!-- ============ HEALTH ============ -->
+    <section id="health" class="view">
+      <div class="view-header">
+        <div class="section-mark"><span class="label">§16 · Salud del sistema · uptime, latencia, jobs</span><span class="rule"></span></div>
+        <h1>Salud del sistema</h1>
+        <p class="lede">Estado de servicios críticos. Latencia API, status de jobs, conexiones externas, errores. <em class="serif-italic">Verde es bueno</em>.</p>
+      </div>
+
+      <div class="grid grid-2 mb-24">
+        <div class="card">
+          <h3>Servicios internos</h3>
+          <div class="health-row"><span><span class="status-dot up"></span>API · Next.js · Vercel</span><span class="mono" style="font-size:10px;">99.98% · 142ms p95</span></div>
+          <div class="health-row"><span><span class="status-dot up"></span>Database · Supabase Postgres</span><span class="mono" style="font-size:10px;">99.99% · 8ms p95</span></div>
+          <div class="health-row"><span><span class="status-dot up"></span>Redis · Upstash · holds</span><span class="mono" style="font-size:10px;">100% · 2ms p95</span></div>
+          <div class="health-row"><span><span class="status-dot up"></span>Storage · Supabase · assets</span><span class="mono" style="font-size:10px;">99.97%</span></div>
+          <div class="health-row"><span><span class="status-dot up"></span>Inngest · jobs</span><span class="mono" style="font-size:10px;">0 fallidos / 412 corridos</span></div>
+        </div>
+        <div class="card">
+          <h3>Servicios externos</h3>
+          <div class="health-row"><span><span class="status-dot up"></span>HubSpot CRM</span><span class="mono" style="font-size:10px;">CONECTADO</span></div>
+          <div class="health-row"><span><span class="status-dot up"></span>Stripe MXN</span><span class="mono" style="font-size:10px;">29 cobros · 0 rechazos</span></div>
+          <div class="health-row"><span><span class="status-dot up"></span>Resend · email</span><span class="mono" style="font-size:10px;">98.4% entregabilidad</span></div>
+          <div class="health-row"><span><span class="status-dot warn"></span>Mifiel · firma</span><span class="mono" style="font-size:10px;">DEGRADADO · LATENCIA</span></div>
+          <div class="health-row"><span><span class="status-dot up"></span>PostHog · analytics</span><span class="mono" style="font-size:10px;">OK</span></div>
+          <div class="health-row"><span><span class="status-dot up"></span>Sentry · errores</span><span class="mono" style="font-size:10px;">3 ERRORES · 7D</span></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>Cron jobs activos</h3>
+        <table>
+          <thead><tr><th>Job</th><th>Schedule</th><th>Última corrida</th><th>Duración</th><th>Próxima</th><th>Status</th></tr></thead>
+          <tbody>
+            <tr><td>Liberar holds expirados</td><td class="mono" style="font-size:10px;">* * * * *</td><td class="mono" style="font-size:10px;">14:54</td><td class="num">1.2s</td><td class="mono" style="font-size:10px;">14:55</td><td><span class="tag ok">OK</span></td></tr>
+            <tr><td>Sync HubSpot batch · contacts</td><td class="mono" style="font-size:10px;">*/15 * * * *</td><td class="mono" style="font-size:10px;">14:45</td><td class="num">4.8s</td><td class="mono" style="font-size:10px;">15:00</td><td><span class="tag ok">OK</span></td></tr>
+            <tr><td>Reintentar webhooks fallidos</td><td class="mono" style="font-size:10px;">*/5 * * * *</td><td class="mono" style="font-size:10px;">14:50</td><td class="num">2.1s</td><td class="mono" style="font-size:10px;">14:55</td><td><span class="tag ok">OK</span></td></tr>
+            <tr><td>Recalcular Rewards puntos</td><td class="mono" style="font-size:10px;">0 * * * *</td><td class="mono" style="font-size:10px;">14:00</td><td class="num">12.4s</td><td class="mono" style="font-size:10px;">15:00</td><td><span class="tag ok">OK</span></td></tr>
+            <tr><td>Notificar apartados que vencen 6h</td><td class="mono" style="font-size:10px;">0 * * * *</td><td class="mono" style="font-size:10px;">14:00</td><td class="num">0.8s</td><td class="mono" style="font-size:10px;">15:00</td><td><span class="tag ok">OK</span></td></tr>
+            <tr><td>Backup DB nocturno</td><td class="mono" style="font-size:10px;">30 23 * * *</td><td class="mono" style="font-size:10px;">23:30 ayer</td><td class="num">142s</td><td class="mono" style="font-size:10px;">23:30 hoy</td><td><span class="tag ok">OK</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ============ REPORTS ============ -->
+    <section id="reports" class="view">
+      <div class="view-header">
+        <div class="section-mark"><span class="label">§17 · Reportes · ejecutivos y operativos</span><span class="rule"></span></div>
+        <h1>Reportes</h1>
+        <p class="lede">Reportes pre-construidos para gobierno, finanzas, fiscal y operación. Cualquier reporte puede programarse para enviarse automáticamente por correo.</p>
+      </div>
+
+      <div class="grid grid-3">
+        <div class="card">
+          <div class="mono mb-8">FINANZAS</div>
+          <h3>Cobros del mes · conciliación</h3>
+          <p class="desc">Todos los cargos Stripe y SPEI con monto, comisión, neto, fecha de liquidación.</p>
+          <div class="mt-16" style="display:flex; gap:8px;">
+            <button class="btn small ghost">PDF</button>
+            <button class="btn small ghost">CSV</button>
+          </div>
+        </div>
+        <div class="card">
+          <div class="mono mb-8">FISCAL</div>
+          <h3>CFDI emitidos · Q2</h3>
+          <p class="desc">Facturas generadas, RFC del cliente, monto, status SAT.</p>
+          <div class="mt-16" style="display:flex; gap:8px;">
+            <button class="btn small ghost">PDF</button>
+            <button class="btn small ghost">XML</button>
+          </div>
+        </div>
+        <div class="card">
+          <div class="mono mb-8">OPERATIVO</div>
+          <h3>Inventario · velocidad de venta</h3>
+          <p class="desc">Días promedio entre cotización y cierre, por proyecto y por unidad.</p>
+          <div class="mt-16" style="display:flex; gap:8px;">
+            <button class="btn small ghost">PDF</button>
+            <button class="btn small ghost">CSV</button>
+          </div>
+        </div>
+        <div class="card">
+          <div class="mono mb-8">COMERCIAL</div>
+          <h3>Performance brokers · trimestre</h3>
+          <p class="desc">Cierres, cotizaciones, conversión, tier Rewards, comisión generada.</p>
+          <div class="mt-16" style="display:flex; gap:8px;">
+            <button class="btn small ghost">PDF</button>
+            <button class="btn small ghost">CSV</button>
+          </div>
+        </div>
+        <div class="card">
+          <div class="mono mb-8">REWARDS</div>
+          <h3>Programa Rewards · acumulado</h3>
+          <p class="desc">Puntos otorgados, canjes, valor económico del programa, top participantes.</p>
+          <div class="mt-16" style="display:flex; gap:8px;">
+            <button class="btn small ghost">PDF</button>
+            <button class="btn small ghost">CSV</button>
+          </div>
+        </div>
+        <div class="card">
+          <div class="mono mb-8">GOBIERNO</div>
+          <h3>Audit log mensual</h3>
+          <p class="desc">Todas las acciones mutadoras del mes, agrupadas por actor.</p>
+          <div class="mt-16" style="display:flex; gap:8px;">
+            <button class="btn small ghost">PDF</button>
+            <button class="btn small ghost">CSV</button>
+          </div>
+        </div>
+        <div class="card">
+          <div class="mono mb-8">EJECUTIVO</div>
+          <h3>Board pack mensual</h3>
+          <p class="desc">KPIs consolidados para consejo: pipeline, cierres, cash, alertas.</p>
+          <div class="mt-16" style="display:flex; gap:8px;">
+            <button class="btn small ghost">PDF</button>
+            <button class="btn small ghost">PPTX</button>
+          </div>
+        </div>
+        <div class="card">
+          <div class="mono mb-8">PRIVACIDAD</div>
+          <h3>Solicitudes ARCO</h3>
+          <p class="desc">Solicitudes de acceso, rectificación, cancelación, oposición · LFPDPPP.</p>
+          <div class="mt-16" style="display:flex; gap:8px;">
+            <button class="btn small ghost">PDF</button>
+            <button class="btn small ghost">CSV</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<script>
+  const sections = {
+    dashboard: { num: '§01', name: 'Dashboard ejecutivo' },
+    inventory: { num: '§02', name: 'Inventario' },
+    clients: { num: '§03', name: 'Clientes & deals' },
+    brokers: { num: '§04', name: 'Brokers' },
+    payments: { num: '§05', name: 'Pagos & reservas' },
+    policies: { num: '§06', name: 'Políticas & montos' },
+    'project-cfg': { num: '§07', name: 'Configuración por proyecto' },
+    commissions: { num: '§08', name: 'Comisiones' },
+    'rewards-cfg': { num: '§09', name: 'Rewards · config' },
+    campaigns: { num: '§10', name: 'Campañas' },
+    'rooms-cfg': { num: '§11', name: 'Salas & guardias' },
+    hubspot: { num: '§12', name: 'HubSpot mapping' },
+    'commissions-pay': { num: '§13', name: 'Comisiones · pasivos &amp; pagos' },
+    applications: { num: '§14', name: 'Solicitudes de broker' },
+    audit: { num: '§15', name: 'Audit log' },
+    health: { num: '§16', name: 'Salud del sistema' },
+    reports: { num: '§17', name: 'Reportes' }
+  };
+
+  function show(view) {
+    document.querySelectorAll('main.canvas section.view').forEach(s => s.classList.remove('active'));
+    const el = document.getElementById(view);
+    if (el) el.classList.add('active');
+    document.querySelectorAll('nav.side-nav button').forEach(b => b.classList.remove('active'));
+    const btn = document.querySelector(`nav.side-nav button[data-view="${view}"]`);
+    if (btn) btn.classList.add('active');
+    const meta = sections[view];
+    if (meta) {
+      document.getElementById('crumb-num').textContent = meta.num;
+      document.getElementById('crumb-name').textContent = meta.name;
+    }
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  document.querySelectorAll('nav.side-nav button').forEach(b => {
+    b.addEventListener('click', () => show(b.dataset.view));
+  });
+
+  // Toggle clicks
+  document.querySelectorAll('.toggle').forEach(t => {
+    t.addEventListener('click', () => t.classList.toggle('on'));
+  });
+
+  // Subtab clicks (visual only in prototype)
+  document.querySelectorAll('.subtabs').forEach(group => {
+    group.querySelectorAll('button').forEach(btn => {
+      btn.addEventListener('click', e => {
+        group.querySelectorAll('button').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+      });
+    });
+  });
+</script>
+
+</body>
+</html>
