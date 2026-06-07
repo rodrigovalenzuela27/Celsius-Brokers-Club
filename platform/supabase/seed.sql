@@ -35,21 +35,21 @@ insert into public.project (id, developer_id, code, name, location, status, deli
     '00000000-0000-0000-0000-000000000001',
     'SOL-2026', 'Solar', 'Polanco, CDMX', 'selling', '2027-12-01', 14,
     '{"towers": 1, "units_per_floor": 6, "amenities": ["gym", "rooftop", "coworking", "sky bar"], "certification": "LEED Gold"}'::jsonb,
-    '{"presale_bonus_pct": 3, "hold_hours": 24}'::jsonb
+    '{"presale_bonus_pct": 3, "direct_purchase_bonus_pct": 1, "hold_hours": 24}'::jsonb
   ),
   (
     '00000000-0000-0000-0000-0000000000a2',
     '00000000-0000-0000-0000-000000000001',
     'ATR-2026', 'Atrio', 'Condesa, CDMX', 'selling', '2027-06-01', 7,
     '{"towers": 2, "units_per_floor": 6, "amenities": ["patio central", "gym", "pet spa"]}'::jsonb,
-    '{"presale_bonus_pct": 4, "hold_hours": 24}'::jsonb
+    '{"presale_bonus_pct": 4, "direct_purchase_bonus_pct": 1, "hold_hours": 24}'::jsonb
   ),
   (
     '00000000-0000-0000-0000-0000000000a3',
     '00000000-0000-0000-0000-000000000001',
     'CIM-2026', 'Cima', 'Coyoacán, CDMX', 'presale', '2029-03-01', 16,
     '{"towers": 1, "units_per_floor": 6, "amenities": ["alberca", "salón de usos múltiples", "huerto urbano"]}'::jsonb,
-    '{"presale_bonus_pct": 7, "hold_hours": 24}'::jsonb
+    '{"presale_bonus_pct": 7, "direct_purchase_bonus_pct": 1, "hold_hours": 24}'::jsonb
   );
 
 -- ---------- Unidades ----------

@@ -34,6 +34,7 @@ export function computeQuote(
   listPrice: number,
   presaleBonusPct: number,
   scheme: PaymentSchemeInput,
+  directPurchaseBonusPct = 0, // canal directo: "sé tu propio broker" (+1%)
 ): QuoteComputation {
   const discounts: Discount[] = [];
   if (presaleBonusPct > 0) {
@@ -41,6 +42,13 @@ export function computeQuote(
       concept: `Bono pre-venta (${presaleBonusPct}%)`,
       pct: presaleBonusPct,
       amount: r2((listPrice * presaleBonusPct) / 100),
+    });
+  }
+  if (directPurchaseBonusPct > 0) {
+    discounts.push({
+      concept: `Bono compra directa (${directPurchaseBonusPct}%)`,
+      pct: directPurchaseBonusPct,
+      amount: r2((listPrice * directPurchaseBonusPct) / 100),
     });
   }
 

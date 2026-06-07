@@ -30,9 +30,12 @@ const MARGIN_Y = 16;
 export function BuildingVisualizer({
   projectId,
   initialUnits,
+  quotePathPrefix = "/broker/quote/new?unit=",
 }: {
   projectId: string;
   initialUnits: Unit[];
+  /** A dónde lleva "Generar cotización" (broker vs portal público). */
+  quotePathPrefix?: string;
 }) {
   const [units, setUnits] = useState(initialUnits);
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -186,7 +189,7 @@ export function BuildingVisualizer({
             </dl>
             {selected.status === "available" ? (
               <Link
-                href={`/broker/quote/new?unit=${selected.id}`}
+                href={`${quotePathPrefix}${selected.id}`}
                 className="mt-5 block w-full bg-accent px-4 py-2.5 text-center text-sm font-medium text-deep transition-colors hover:bg-accent-hover"
               >
                 Generar cotización →

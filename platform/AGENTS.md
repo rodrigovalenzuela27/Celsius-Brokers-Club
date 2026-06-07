@@ -41,7 +41,7 @@ pnpm lint && pnpm typecheck && pnpm build
 - [x] **Fase 0** — scaffold, schema 10 entidades + RLS, tokens de marca, auth con roles, CI
 - [x] **Fase 1** — inventario y catálogo, visualizador SVG data-driven, realtime
 - [x] **Fase 2** — quote engine atómico + clientes + PDF + apartado 24h con cron pg_cron
-- [ ] Fase 3 — Stripe + portal cliente público
+- [x] **Fase 3** — portal público (catálogo anon, compra directa +1%, acceso por código OTP, pago de enganche + reserva). Pagos detrás de adapter: MockProvider activo; StripeProvider pendiente de keys (`lib/payments.ts`)
 - [ ] Fase 4 — HubSpot sync + motor de comisiones + payment runs
 - [ ] Fase 5 — onboarding brokers, audit UI, analytics, hardening
 - [ ] Fase 6 — Rewards, campañas, academia, Mifiel, multi-tenant SaaS

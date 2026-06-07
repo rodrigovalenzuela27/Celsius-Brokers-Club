@@ -5,6 +5,7 @@ import { createClient } from "@/lib/supabase/server";
 import { formatMXN } from "@/lib/format";
 import type { Discount } from "@/lib/quote-engine";
 import { releaseHold } from "../actions";
+import { ShareCode } from "./share-code";
 
 type QuoteDetail = {
   id: string;
@@ -99,6 +100,13 @@ export default async function QuoteDetailPage({
           ) : null}
         </div>
       </div>
+
+      {["hold_active", "sent", "reserved"].includes(quote.status) ? (
+        <div className="mb-6 border border-hairline bg-deep p-4">
+          <p className="section-mark mb-3">Acceso del cliente · portal</p>
+          <ShareCode quoteId={quote.id} />
+        </div>
+      ) : null}
 
       {holdActive ? (
         <div className="mb-6 flex items-center justify-between border border-accent/40 bg-deep p-4">
