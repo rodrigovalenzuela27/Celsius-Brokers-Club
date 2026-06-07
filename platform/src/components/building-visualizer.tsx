@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { formatMXN } from "@/lib/format";
@@ -183,14 +184,22 @@ export function BuildingVisualizer({
                 </div>
               ))}
             </dl>
-            <button
-              type="button"
-              disabled={selected.status !== "available"}
-              className="mt-5 w-full bg-accent px-4 py-2.5 text-sm font-medium text-deep transition-colors hover:bg-accent-hover disabled:cursor-not-allowed disabled:opacity-40"
-              title="El cotizador llega en fase 2"
-            >
-              Generar cotización → (fase 2)
-            </button>
+            {selected.status === "available" ? (
+              <Link
+                href={`/broker/quote/new?unit=${selected.id}`}
+                className="mt-5 block w-full bg-accent px-4 py-2.5 text-center text-sm font-medium text-deep transition-colors hover:bg-accent-hover"
+              >
+                Generar cotización →
+              </Link>
+            ) : (
+              <button
+                type="button"
+                disabled
+                className="mt-5 w-full bg-accent px-4 py-2.5 text-sm font-medium text-deep opacity-40"
+              >
+                No disponible
+              </button>
+            )}
           </>
         ) : (
           <p className="text-sm text-graphite">

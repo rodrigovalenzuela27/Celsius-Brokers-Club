@@ -40,7 +40,7 @@ pnpm lint && pnpm typecheck && pnpm build
 
 - [x] **Fase 0** — scaffold, schema 10 entidades + RLS, tokens de marca, auth con roles, CI
 - [x] **Fase 1** — inventario y catálogo, visualizador SVG data-driven, realtime
-- [ ] Fase 2 — quote engine + PDF + apartado 24h (núcleo)
+- [x] **Fase 2** — quote engine atómico + clientes + PDF + apartado 24h con cron pg_cron
 - [ ] Fase 3 — Stripe + portal cliente público
 - [ ] Fase 4 — HubSpot sync + motor de comisiones + payment runs
 - [ ] Fase 5 — onboarding brokers, audit UI, analytics, hardening

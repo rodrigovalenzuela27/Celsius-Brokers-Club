@@ -12,7 +12,11 @@ export default async function BrokerLayout({
     <AppShell
       profile={profile}
       area="Cotizador & Pipeline"
-      nav={[{ href: "/broker", label: "Catálogo" }]}
+      nav={[
+        { href: "/broker", label: "Catálogo" },
+        { href: "/broker/quotes", label: "Cotizaciones" },
+        { href: "/broker/clients", label: "Clientes" },
+      ]}
     >
       {children}
     </AppShell>
