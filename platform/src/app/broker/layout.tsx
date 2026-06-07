@@ -16,6 +16,7 @@ export default async function BrokerLayout({
         { href: "/broker", label: "Catálogo" },
         { href: "/broker/quotes", label: "Cotizaciones" },
         { href: "/broker/clients", label: "Clientes" },
+        { href: "/broker/commissions", label: "Mis comisiones" },
       ]}
     >
       {children}
