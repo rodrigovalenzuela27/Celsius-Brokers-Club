@@ -6,6 +6,7 @@ type CommissionRow = {
   folio: string;
   status: string;
   base_pct: number;
+  tier_bonus_pct: number;
   amount_mxn: number;
   milestone: string;
   earned_at: string | null;
@@ -40,7 +41,7 @@ export default async function CommissionsPage() {
   const { data: commissions } = await supabase
     .from("commission")
     .select(
-      "id, folio, status, base_pct, amount_mxn, milestone, earned_at, target_pay_date, paid_at, quote:quote_id(folio, client:client_id(full_name), unit:unit_id(unit_number, project:project_id(name)))",
+      "id, folio, status, base_pct, tier_bonus_pct, amount_mxn, milestone, earned_at, target_pay_date, paid_at, quote:quote_id(folio, client:client_id(full_name), unit:unit_id(unit_number, project:project_id(name)))",
     )
     .order("created_at", { ascending: false })
     .returns<CommissionRow[]>();
@@ -96,7 +97,13 @@ export default async function CommissionsPage() {
                   </td>
                   <td className="px-4 py-3">
                     {formatMXN(c.amount_mxn)}{" "}
-                    <span className="text-xs text-graphite">({c.base_pct}%)</span>
+                    <span className="text-xs text-graphite">
+                      ({c.base_pct}%
+                      {c.tier_bonus_pct > 0 ? (
+                        <span className="text-accent"> +{c.tier_bonus_pct}% tier</span>
+                      ) : null}
+                      )
+                    </span>
                   </td>
                   <td className="px-4 py-3 text-graphite">
                     {MILESTONE[c.milestone] ?? c.milestone}

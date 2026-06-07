@@ -44,7 +44,8 @@ pnpm lint && pnpm typecheck && pnpm build
 - [x] **Fase 3** — portal público (catálogo anon, compra directa +1%, acceso por código OTP, pago de enganche + reserva). Pagos detrás de adapter: MockProvider activo; StripeProvider pendiente de keys (`lib/payments.ts`)
 - [x] **Fase 4** — motor de comisiones (devengo por hito de proyecto, reverso 90d, payment runs con ISR 10%) + cola de eventos HubSpot (`hubspot_sync_log`; el worker llega con credenciales)
 - [x] **Fase 5** — solicitudes de broker con upload de docs (bytea local → Storage en cloud), aprobación que crea la cuenta con inmobiliaria, audit log UI, analytics, rate limiting del canje de códigos
-- [ ] Fase 6 — Rewards, campañas, academia, Mifiel, multi-tenant SaaS
+- [x] **Fase 6** — Celsius Rewards (puntos por hitos vía trigger, tiers que suman % a la comisión, catálogo de canje con stock/tier mínimo, leaderboard) + Campañas (pop-ups/banners por audiencia, RLS para brokers y portal anon)
+- [ ] Fase 7 (backlog) — academia/salas/guardias/eventos, expedientes OCR, Mifiel, multi-tenant + billing SaaS
 
 ## Convenciones
 

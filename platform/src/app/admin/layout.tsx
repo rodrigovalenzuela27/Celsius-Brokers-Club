@@ -17,6 +17,7 @@ export default async function AdminLayout({
         { href: "/admin/inventory", label: "Inventario" },
         { href: "/admin/commissions", label: "Comisiones" },
         { href: "/admin/applications", label: "Solicitudes" },
+        { href: "/admin/campaigns", label: "Campañas" },
         { href: "/admin/analytics", label: "Analytics" },
         { href: "/admin/audit", label: "Audit" },
       ]}

@@ -108,6 +108,19 @@ insert into public.brokerage_project_access (brokerage_id, project_id, commissio
   ('00000000-0000-0000-0000-0000000000b2', '00000000-0000-0000-0000-0000000000a2', 2.50),
   ('00000000-0000-0000-0000-0000000000b3', '00000000-0000-0000-0000-0000000000a3', 2.50);
 
+-- ---------- Celsius Rewards · tiers y catálogo ----------
+insert into public.reward_tier (developer_id, slug, name, min_points, commission_bonus_pct, sort) values
+  ('00000000-0000-0000-0000-000000000001', 'bellota', 'Bellota', 0, 0, 1),
+  ('00000000-0000-0000-0000-000000000001', 'roble-joven', 'Roble Joven', 1000, 0.5, 2),
+  ('00000000-0000-0000-0000-000000000001', 'roble', 'Roble', 3000, 1.5, 3),
+  ('00000000-0000-0000-0000-000000000001', 'roble-maestro', 'Roble Maestro', 8000, 3, 4);
+
+insert into public.reward_item (developer_id, title, description, points_cost, stock, min_tier_slug) values
+  ('00000000-0000-0000-0000-000000000001', 'Curso · Cierre avanzado', 'Acceso al curso premium de la academia', 300, null, null),
+  ('00000000-0000-0000-0000-000000000001', 'Cena para 2 · evento VIP', 'Cena con el equipo directivo en lanzamiento', 800, 12, null),
+  ('00000000-0000-0000-0000-000000000001', 'iPad Air', 'Para tus presentaciones en showroom', 2400, 3, 'roble-joven'),
+  ('00000000-0000-0000-0000-000000000001', 'Mentoría 1:1 con dirección comercial', 'Sesión mensual por un trimestre', 1500, 5, 'roble');
+
 -- ---------- Usuarios de prueba ----------
 -- Los usuarios se crean vía Supabase Auth (no por seed SQL directo a auth.users
 -- en producción). Para desarrollo local, crear con:
