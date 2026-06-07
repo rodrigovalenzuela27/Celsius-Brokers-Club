@@ -1,0 +1,53 @@
+@import "tailwindcss";
+
+/* ============================================================
+   Tokens ACORN / Celsius
+   Paleta extraída del sitio institucional 0celsius.mx
+   (misma fuente de verdad que el prototipo y el README).
+   ============================================================ */
+@theme inline {
+  /* Superficies */
+  --color-canvas: #383838; /* charcoal · fondo principal */
+  --color-deep: #1e1e1e; /* deep dark · sidebar, modales, hero */
+  --color-stone: #4a4a4a; /* bordes sólidos, scrollbar */
+
+  /* Texto */
+  --color-ink: #f5f5f5; /* texto primario */
+  --color-graphite: #b5b5b5; /* texto secundario · metadata */
+
+  /* Acento */
+  --color-accent: #009dea; /* cyan Celsius · CTAs, estados activos */
+  --color-accent-hover: #38a9ff; /* cyan hover */
+  --color-accent-soft: #80c5f0; /* cyan suave */
+
+  /* Hairlines */
+  --color-hairline: rgb(255 255 255 / 0.1);
+  --color-hairline-strong: rgb(255 255 255 / 0.24);
+
+  /* Estados de unidad (visualizador) */
+  --color-unit-available: #3d8b5f;
+  --color-unit-held: #c9913d;
+  --color-unit-sold: #2d2d2d;
+
+  /* Tipografía (variables inyectadas por next/font en layout.tsx) */
+  --font-sans: var(--font-inter-tight), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-jetbrains-mono), ui-monospace, monospace;
+  --font-serif: var(--font-source-serif), Georgia, serif;
+}
+
+body {
+  background: var(--color-canvas);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  font-variant-numeric: tabular-nums;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Marcador de sección estilo prototipo: § + JetBrains Mono uppercase */
+.section-mark {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--color-graphite);
+}

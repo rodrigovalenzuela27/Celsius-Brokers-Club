@@ -28,8 +28,11 @@ Abrir `index.html` para la landing con accesos a las tres vistas.
 ├── celsius-portal-cliente.html             · vista cliente · sitio público
 ├── celsius-admin.html                      · vista admin · 17 secciones
 ├── celsius-cotizador-arquitectura.docx     · documento técnico
+├── platform/                               · ⚡ la aplicación real (Next.js + Supabase)
 └── README.md                               · este archivo
 ```
+
+> **`platform/`** es la implementación productiva del prototipo (Fase 0 completada: schema con RLS, auth con roles, tokens de marca, CI). Ver [`platform/README.md`](platform/README.md).
 
 ---
 
