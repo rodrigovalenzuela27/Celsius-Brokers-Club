@@ -35,6 +35,8 @@ export default async function BrokerLayout({
         { href: "/broker/clients", label: "Clientes" },
         { href: "/broker/commissions", label: "Mis comisiones" },
         { href: "/broker/rewards", label: "Rewards" },
+        { href: "/broker/showroom", label: "Showroom" },
+        { href: "/broker/community", label: "Comunidad" },
       ]}
     >
       {banner ? <CampaignBanner campaign={banner} /> : null}

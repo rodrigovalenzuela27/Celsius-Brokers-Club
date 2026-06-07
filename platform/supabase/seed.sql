@@ -121,6 +121,30 @@ insert into public.reward_item (developer_id, title, description, points_cost, s
   ('00000000-0000-0000-0000-000000000001', 'iPad Air', 'Para tus presentaciones en showroom', 2400, 3, 'roble-joven'),
   ('00000000-0000-0000-0000-000000000001', 'Mentoría 1:1 con dirección comercial', 'Sesión mensual por un trimestre', 1500, 5, 'roble');
 
+-- ---------- Showroom: salas y guardias ----------
+insert into public.room (developer_id, showroom, name, capacity, equipment) values
+  ('00000000-0000-0000-0000-000000000001', 'Solar Polanco', 'Sala Bosque', 6, 'Pantalla 75", maqueta'),
+  ('00000000-0000-0000-0000-000000000001', 'Solar Polanco', 'Sala Roble', 4, 'Pantalla 55"'),
+  ('00000000-0000-0000-0000-000000000001', 'Atrio Condesa', 'Depto muestra', 8, 'Recorrido completo');
+
+insert into public.duty_slot (developer_id, showroom, duty_date, shift)
+select '00000000-0000-0000-0000-000000000001', s.showroom, d::date, sh.shift
+from generate_series(current_date, current_date + 6, interval '1 day') d
+cross join (values ('Solar Polanco'), ('Atrio Condesa')) s(showroom)
+cross join (values ('matutino'), ('vespertino')) sh(shift);
+
+-- ---------- Eventos y academia ----------
+insert into public.event (developer_id, title, kind, starts_at, location, capacity, points) values
+  ('00000000-0000-0000-0000-000000000001', 'Webinar · Crédito hipotecario 2026', 'webinar', now() + interval '3 days', 'Zoom', 100, 30),
+  ('00000000-0000-0000-0000-000000000001', 'Open house · Atrio', 'showroom', now() + interval '6 days', 'Atrio Condesa', 40, 20),
+  ('00000000-0000-0000-0000-000000000001', 'Lanzamiento · Cima fase 2', 'lanzamiento', now() + interval '12 days', 'Showroom Coyoacán', 80, 20);
+
+insert into public.course (developer_id, title, category, description, duration_min, points_cost, points_reward) values
+  ('00000000-0000-0000-0000-000000000001', 'Onboarding Celsius', 'Producto', 'Plataforma, inventario y proceso de venta', 45, 0, 50),
+  ('00000000-0000-0000-0000-000000000001', 'Cierre avanzado', 'Ventas', 'Manejo de objeciones y cierre consultivo', 120, 300, 80),
+  ('00000000-0000-0000-0000-000000000001', 'Crédito hipotecario MX', 'Hipotecario', 'BBVA, Santander, INFONAVIT y esquemas mixtos', 90, 200, 60),
+  ('00000000-0000-0000-0000-000000000001', 'Marca personal del broker', 'Negocio', 'Pipeline propio con redes y referidos', 60, 150, 50);
+
 -- ---------- Usuarios de prueba ----------
 -- Los usuarios se crean vía Supabase Auth (no por seed SQL directo a auth.users
 -- en producción). Para desarrollo local, crear con:
