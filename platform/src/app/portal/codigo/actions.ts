@@ -33,7 +33,12 @@ export async function redeemCode(
 
   if (error) return { error: error.message.replace(/^.*?: /, "") };
 
-  const result = data as { quote_id: string; token: string };
+  // La función retorna {error} en vez de lanzar, para que el contador
+  // de rate limiting persista en intentos fallidos.
+  const result = data as { quote_id?: string; token?: string; error?: string };
+  if (result.error || !result.quote_id || !result.token) {
+    return { error: result.error ?? "No se pudo canjear el código" };
+  }
   await setQuoteAccess(result.quote_id, result.token);
   redirect(`/portal/cotizacion/${result.quote_id}`);
 }

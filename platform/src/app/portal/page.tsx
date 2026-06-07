@@ -52,17 +52,21 @@ export default function PortalLanding() {
           </p>
         </Link>
 
-        <div className="border border-hairline bg-deep p-6 opacity-60">
-          <p className="section-mark mb-3">Ruta C</p>
+        <Link
+          href="/portal/broker"
+          className="group border border-hairline bg-deep p-6 transition-colors hover:border-accent"
+        >
+          <p className="section-mark mb-3 !text-accent">Ruta C</p>
           <h2 className="mb-2 text-xl">Quiero ser broker</h2>
           <p className="text-sm text-graphite">
-            Alta de brokers externos con validación documental — disponible en
-            la fase 5 de la plataforma.
+            Vende inventario Celsius: comisión base 2.5% + bonos. Sube tu
+            documentación y recibe respuesta en 3 días hábiles.
           </p>
-          <p className="mt-4 text-xs uppercase tracking-wider text-graphite">
-            Próximamente
+          <p className="mt-4 text-xs uppercase tracking-wider text-accent">
+            Enviar solicitud{" "}
+            <span className="inline-block transition-transform group-hover:translate-x-1">→</span>
           </p>
-        </div>
+        </Link>
       </section>
     </div>
   );
